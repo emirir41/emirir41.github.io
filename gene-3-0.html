@@ -156,22 +156,102 @@ function pick(arr) {
 // ============================================================
 // ARAÇLAR
 // ============================================================
+// ============================================================
+// GÜÇLENDİRİLMİŞ MATEMATİK MOTORU
+// ============================================================
+function factorial(n) {
+  if (n < 0) return NaN;
+  if (n === 0 || n === 1) return 1;
+  if (n > 170) return Infinity;
+  var r = 1; for (var i = 2; i <= n; i++) r *= i; return r;
+}
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = b; b = a % b; a = t; } return a; }
+
+function parseMathText(raw) {
+  var e = raw.trim();
+  // Türkçe sayı kelimeleri
+  e = e.replace(/\bsıfır\b/gi,'0').replace(/\bbir\b/gi,'1').replace(/\biki\b/gi,'2')
+       .replace(/\büç\b/gi,'3').replace(/\bdört\b/gi,'4').replace(/\bbeş\b/gi,'5')
+       .replace(/\baltı\b/gi,'6').replace(/\byedi\b/gi,'7').replace(/\bsekiz\b/gi,'8')
+       .replace(/\bdokuz\b/gi,'9').replace(/\bon\b/gi,'10').replace(/\byüz\b/gi,'100')
+       .replace(/\bbin\b/gi,'1000').replace(/\bmilyon\b/gi,'1000000');
+  // Türkçe operatör kelimeleri
+  e = e.replace(/\bçarpı\b|\bkere\b|\büzeri\b/gi,'*')
+       .replace(/\bbölü\b|\bbölünce\b/gi,'/')
+       .replace(/\bartı\b|\bve\b(?=\s*\d)/gi,'+')
+       .replace(/\beksi\b|\bçıkar\b|\bminus\b/gi,'-')
+       .replace(/\bmod\b/gi,'%');
+  // Türkçe fonksiyon isimleri
+  e = e.replace(/karekök\s*\(?([^)]+)\)?/gi, function(_,x){ return 'Math.sqrt('+x.trim()+')'; });
+  e = e.replace(/küp\s*kök\s*\(?([^)]+)\)?/gi, function(_,x){ return 'Math.cbrt('+x.trim()+')'; });
+  e = e.replace(/\bsin\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.sin(('+x.trim()+')*Math.PI/180)'; });
+  e = e.replace(/\bcos\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.cos(('+x.trim()+')*Math.PI/180)'; });
+  e = e.replace(/\btan\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.tan(('+x.trim()+')*Math.PI/180)'; });
+  e = e.replace(/\blog2\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.log2('+x.trim()+')'; });
+  e = e.replace(/\blog\s*10\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.log10('+x.trim()+')'; });
+  e = e.replace(/\blog\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.log10('+x.trim()+')'; });
+  e = e.replace(/\bln\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.log('+x.trim()+')'; });
+  e = e.replace(/\babs\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.abs('+x.trim()+')'; });
+  e = e.replace(/\bceil\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.ceil('+x.trim()+')'; });
+  e = e.replace(/\bfloor\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.floor('+x.trim()+')'; });
+  e = e.replace(/\bround\s*\(([^)]+)\)/gi, function(_,x){ return 'Math.round('+x.trim()+')'; });
+  // Üs alma: 2^10, 2**10
+  e = e.replace(/([\d.]+)\s*\*\*\s*([\d.]+)/g, 'Math.pow($1,$2)');
+  e = e.replace(/([\d.]+)\s*\^\s*([\d.]+)/g, 'Math.pow($1,$2)');
+  // Faktöriyel: 5!
+  e = e.replace(/(\d+)!/g, function(_,n){ return factorial(parseInt(n)); });
+  // Pi, e sabitleri
+  e = e.replace(/\bpi\b/gi,'Math.PI').replace(/\be\b(?!\w)/g,'Math.E');
+  // Virgülü nokta yap (binlik değil, ondalık)
+  e = e.replace(/(\d),(\d)/g,'$1.$2');
+  // Çarpma operatörü: 2(3) → 2*(3), 2x3 → 2*3
+  e = e.replace(/(\d)\s*\(/g,'$1*(').replace(/\)\s*(\d)/g,')*$1');
+  e = e.replace(/(\d)\s*x\s*(\d)/gi,'$1*$2');
+  // Kalan temizlik
+  e = e.replace(/[^0-9+\-*\/.()%,MathsqrtcbrlogabsceilflooroundwPIE]/g,' ').replace(/\s+/g,'').trim();
+  return e;
+}
+
 function solveMath(raw) {
   try {
-    var e = raw.trim().replace(/,/g,'.').replace(/x/gi,'*').replace(/×/g,'*').replace(/÷/g,'/');
-    e = e.replace(/karekök\s*([\d.]+)/gi,'Math.sqrt($1)').replace(/([\d.]+)\s*\^\s*([\d.]+)/g,'Math.pow($1,$2)').replace(/pi/gi,'Math.PI');
-    e = e.replace(/(\d+)!/g, function(_,n){ var num=parseInt(n); if(num>20) return '9999999'; var f=1; for(var i=2;i<=num;i++) f*=i; return f; });
-    e = e.replace(/[^0-9+\-*\/.()% MathsqrpowPIE]/g,'').trim();
-    if (!e) return null;
+    var e = parseMathText(raw);
+    if (!e || e.length < 1) return null;
     var r = Function('"use strict"; return (' + e + ')')();
     if (typeof r !== 'number' || isNaN(r) || !isFinite(r)) return null;
+    // Formatla
+    if (Math.abs(r) > 1e15) return r.toExponential(4).replace('.',',');
     if (Number.isInteger(r)) return r.toLocaleString('tr-TR');
-    return parseFloat(r.toFixed(8)).toString().replace('.',',');
+    return parseFloat(r.toFixed(10)).toString().replace('.',',');
   } catch(err) { return null; }
 }
+
+// Matematik tanıma — hem sembolik hem Türkçe ifadeler
 function isMathExpr(t) {
-  var c = t.trim().replace(/çarpı|kere/gi,'*').replace(/bölü/gi,'/').replace(/artı/gi,'+').replace(/eksi/gi,'-').replace(/,/g,'.');
+  var tl = t.toLowerCase()
+    .replace(/[ğ]/g,'g').replace(/[ü]/g,'u').replace(/[ş]/g,'s')
+    .replace(/[ı]/g,'i').replace(/[ö]/g,'o').replace(/[ç]/g,'c');
+  // Açık matematik anahtar kelimeleri
+  if (/karekök|kup kok|faktoriyel|trigonometri|sin\s*\(|cos\s*\(|tan\s*\(|log\s*\(|ln\s*\(|log2|log10/.test(tl)) return true;
+  if (/\d+\s*[+\-*\/^%]\s*\d/.test(t)) return true;
+  if (/\d+\s*\*\*\s*\d/.test(t)) return true;
+  if (/\d+!/.test(t)) return true;
+  if (/\d+\s*(kere|carpi|bolu|arti|eksi)\s*\d/i.test(tl)) return true;
+  if (/hesapla|kac eder|kac yapar|sonucu ne|esittir|toplami|farki|carpimi/i.test(tl) && /\d/.test(t)) return true;
+  // Saf sayısal ifade
+  var c = t.trim().replace(/[çarpıkere]/gi,'*').replace(/bölü/gi,'/').replace(/,/g,'.');
   return /^[\d\s+\-*\/.()%^]+$/.test(c) && /\d/.test(c) && /[+\-*\/^]/.test(c);
+}
+
+// Özel matematik intent kontrolü (detectIntent'ten önce)
+function mathIntent(text) {
+  var tl = text.toLowerCase()
+    .replace(/[ğ]/g,'g').replace(/[ü]/g,'u').replace(/[ş]/g,'s')
+    .replace(/[ı]/g,'i').replace(/[ö]/g,'o').replace(/[ç]/g,'c');
+  // Açık tetikleyiciler
+  if (/karekök|kup kok|sin\s*\(|cos\s*\(|tan\s*\(|log\s*\(|ln\s*\(|log2|log10|faktoriyel|\d+!|\*\*/.test(tl)) return true;
+  if (/hesapla|kac eder|kac yapar|esittir mi|toplam|carpim|fark|bolum/.test(tl) && /\d/.test(text)) return true;
+  if (isMathExpr(text)) return true;
+  return false;
 }
 function tarihCevap() {
   var n = new Date();
@@ -695,40 +775,40 @@ firstName + ', ne zaman oluyor?',
 'Umarım güzel gelir. 🌟'
 ],
 dinle_olumsuz:[
-'Seni duyuyorum ' + firstName + '. 💙 Anlat, ne oldu? Dinliyorum seni.',
-'Zor bir şey bu. 😔 Biraz daha anlat, ne hissediyorsun?',
-firstName + ', bazen sadece birinin dinlemesi bile yeterli. Ben buradayım, devam et.',
-'Hmm, bu gerçekten zor görünüyor. 💙 Ne zamandan beri böyle hissediyorsun?',
-'Anladım. 😔 Peki bu konuda ne yapmak istiyorsun, bir fikrin var mı?',
-'Yanındayım. Hepsini dinliyorum.',
-'Bu çok ağır bir yük. 💙 Paylaşmak ister misin?',
+'Zor bir şey bu. 😔 Ne oldu, anlatmak ister misin?',
+firstName + ', bu gerçekten ağır görünüyor. Ne var?',
+'Hmm. Ne zamandan beri böyle hissediyorsun?',
+'Anlıyorum. 😔 Bu konuda ne yapmak istiyorsun?',
+'Bu çok ağır bir yük. Paylaşmak ister misin?',
 firstName + ', güçlü görünüyorsun ama içinde ne var?',
-'Bazen dışa vurmak gerekiyor. Ben buradayım. 💙',
-'Anlıyorum. Zor bir dönem. Anlat devam et.'
+'Bazen dışa vurmak gerekiyor. Ne oldu?',
+'Zor bir dönem galiba. Ne var?',
+'Yanındayım. Ne hissediyorsun?',
+'Bu hissi anlıyorum. Ne oldu sana?'
 ],
 dinle_olumlu:[
-'Vay, kulağa güzel geliyor! 😊 Devam et, dinliyorum!',
-'Harika! 🎉 Anlat bakalım daha fazla, merak ettim!',
-firstName + ', bu enerji çok güzel! 🌟 Ne oldu, paylaş!',
+'Vay, kulağa güzel geliyor! 😊 Anlat bakalım!',
+'Harika! 🎉 Ne oldu, merak ettim!',
+firstName + ', bu enerji çok güzel! 🌟 Paylaş!',
 'Oh bu iyi bir şey! 😄 Devam et!',
 'Güzel şeyler var demek! 🎊 Anlat!',
-'Enerjin çok iyi! Ne oldu bugün?',
-'Bu haber beni de sevindirdi! 😊',
-'Harika ' + firstName + '! Anlat bakalım.',
-'Bu haberini duymak güzeldi! 🌟',
-'Devam et, merak ettim! 😄'
+'Enerjin çok iyi bugün! Ne oldu?',
+'Bu beni de sevindirdi! 😊 Ne var?',
+'Harika ' + firstName + '! Ne oldu bakalım?',
+'Güzel bir haber bu! 🌟 Anlat.',
+'Bu enerji nereden geliyor? 😄'
 ],
 dinle_notr:[
-'Anlıyorum. 😊 Devam et, dinliyorum.',
-'Hmm, ilginç. 🤔 Daha fazla anlat?',
-firstName + ', seni dinliyorum. Devam et.',
-'Tamam, anladım. Peki sen bu konuda ne düşünüyorsun?',
-'Anladım. Başka ne var?',
-'Devam et, dinliyorum. 😊',
-'Hmm. Ne hissediyorsun bununla ilgili?',
-'İlginç bir durum. Anlat bakalım.',
-'Peki ne oldu sonra?',
-'Anlıyorum. Daha fazla bilgi ver.'
+'Anlıyorum. 😊 Peki ne düşünüyorsun?',
+'Hmm, ilginç. 🤔 Daha fazla anlat.',
+'Tamam. Sen bu konuda ne hissediyorsun?',
+'Devam et bakalım. Ne var?',
+'Hmm. Ne oldu sonra?',
+'İlginç bir durum. Ne düşünüyorsun?',
+firstName + ', anlat bakalım.',
+'Tamam, anlıyorum. Peki sonra ne oldu?',
+'Bu konuda ne yapmak istiyorsun?',
+'Anlat, ne var kafanda?'
 ],
 default3:[
 firstName + ', anlayamadım tam olarak. Biraz daha açıklar mısın?',
@@ -752,24 +832,39 @@ function detectIntent(text) {
   var tl = text.toLowerCase()
     .replace(/[ğ]/g,'g').replace(/[ü]/g,'u').replace(/[ş]/g,'s')
     .replace(/[ı]/g,'i').replace(/[ö]/g,'o').replace(/[ç]/g,'c');
-  if (/saat kac|bugun ne|hangi gun/i.test(tl)) return 'tarih';
-  if (/dolar|euro|sterlin|doviz|kur/i.test(tl)) return 'doviz';
-  if (/hava|derece|sicaklik|yagmur/i.test(tl)) return 'hava';
-  if (isMathExpr(text)) return 'matematik';
-  if (/karekök|sqrt|\d+!/i.test(text)) return 'matematik';
+
+  // 1. Sohbet kategorileri — önce kontrol et, Wikipedia'ya atlatma
   for (var cat in INTENTS) {
     var pats = INTENTS[cat];
     for (var i=0; i<pats.length; i++) {
-      if (tl.indexOf(pats[i].toLowerCase().replace(/[ğüşıöç]/g,function(c){return {ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'}[c]||c})) !== -1) return cat;
+      var p = pats[i].toLowerCase().replace(/[ğüşıöç]/g,function(c){return {ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'}[c]||c});
+      if (tl.indexOf(p) !== -1) return cat;
     }
   }
+
+  // 2. Fonksiyonel araçlar
+  if (/saat kac|bugun ne|hangi gun|tarih nedir|gun nedir/.test(tl)) return 'tarih';
+  if (/dolar|euro|sterlin|doviz|kur|frank|yen/.test(tl)) return 'doviz';
+  if (/hava durumu|kac derece|sicaklik|yagmur mu|kar mi|hava nasil/.test(tl)) return 'hava';
+
+  // 3. Matematik — güçlü tespit
+  if (mathIntent(text)) return 'matematik';
+
+  // 4. Sohbet mi? → Wikipedia'ya gitme
   if (isSohbet(text)) {
     var duygu = duyguAnaliz(text);
     if (duygu === 'olumsuz') return 'uzuntu';
     if (duygu === 'olumlu') return 'mutluluk';
     return 'dinle';
   }
-  if (/nedir|kimdir|ne zaman|nerede|nasil|hakkinda|acikla|anlat|tarih/i.test(tl)) return 'arama';
+
+  // 5. Sadece net bilgi soruları Wikipedia'ya gitsin
+  // "nedir", "kimdir" gibi kesin bilgi sorusu olmalı VE kısa cümle değil
+  var kelimeSayisi = text.trim().split(/\s+/).length;
+  var netBilgiSorusu = /\bnedir\b|\bkimdir\b|\bne zaman\b|\bnerede\b|\bhangi yil\b|\bkac yil\b|\btarihte\b|\bnumarasi\b/.test(tl);
+  var sohbetVar = /\bseviyorum\b|\bsevdim\b|\biyi\b|\bkotu\b|\bmutlu\b|\buzgun\b|\byorgun\b|\barka\b|\barkadas\b|\beve\b|\bgeldim\b|\bgittim\b|\byedim\b|\bictim\b|\bsaat\b|\bbugün\b|\bbugun\b/.test(tl);
+  if (netBilgiSorusu && !sohbetVar && kelimeSayisi <= 8) return 'arama';
+
   return 'dinle';
 }
 
@@ -779,10 +874,17 @@ async function gene3Reply(text) {
 
   if (intent === 'tarih') return tarihCevap();
   if (intent === 'matematik') {
-    var me = text.replace(/çarpı|kere/gi,'*').replace(/bölü/gi,'/').replace(/artı/gi,'+').replace(/eksi/gi,'-').replace(/,/g,'.');
+    var me = text
+      .replace(/çarpı|kere/gi,'*').replace(/bölü/gi,'/').replace(/artı/gi,'+').replace(/eksi/gi,'-')
+      .replace(/üssü/gi,'^').replace(/karesini al/gi,'karekök').replace(/,/g,'.');
     var r = solveMath(me);
-    if (r !== null) return '🧮 **' + text.trim() + ' = ' + r + '**';
-    return '🧮 Bu işlemi çözemedim. Örnek: (15 + 3) * 200';
+    if (r !== null) {
+      // Sonucu güzel formatla
+      var soru = text.trim().replace(/\s+/g,' ');
+      return '🧮 **' + soru + ' = ' + r + '**';
+    }
+    // Hata mesajı — ne yazılabilir göster
+    return '🧮 Bu işlemi tam anlayamadım.\n\n**Desteklenen işlemler:**\n• Temel: `15 + 3 * 200`, `(18 / 3) ^ 2`\n• Kök: `karekök(144)`, `karekök 81`\n• Üs: `2^10`, `3**4`\n• Trigonometri: `sin(30)`, `cos(45)`, `tan(60)`\n• Logaritma: `log(100)`, `ln(10)`, `log2(8)`\n• Faktöriyel: `10!`, `7!`\n• Sabitler: `pi * 5^2`, `e^2`\n• Türkçe: `15 kere 4 artı 7 bölü 2`';
   }
   if (intent === 'hava') { return await havaCevap(extractCity(text)); }
   if (intent === 'doviz') {
