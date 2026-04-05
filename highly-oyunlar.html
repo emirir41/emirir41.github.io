@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>Highly — Oyunlar</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+[data-theme="dark"]{
+  --bg:#06070f;--s1:#0b0d1c;--s2:#0f1125;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8e8ff;--muted:#4a4d6a;--text2:#9ca3c8;
+  --nav:#06070f;--a1:#6366f1;--a2:#a78bfa;
+}
+[data-theme="glass"]{
+  --bg:linear-gradient(135deg,#0a0f2e,#0d1635);
+  --s1:rgba(255,255,255,0.06);--s2:rgba(255,255,255,0.1);
+  --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.2);
+  --text:#f0f4ff;--muted:rgba(255,255,255,0.45);--text2:rgba(255,255,255,0.7);
+  --nav:rgba(10,15,46,0.8);--a1:#818cf8;--a2:#c4b5fd;
+}
+[data-theme="light"]{
+  --bg:#f5f6fa;--s1:#ffffff;--s2:#f0f1f8;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1a1b2e;--muted:#9095b0;--text2:#6b6f8e;
+  --nav:#ffffff;--a1:#6366f1;--a2:#4f46e5;
+}
+
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;transition:background .3s,color .3s;overflow-x:hidden}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:var(--nav);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px}
+.nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--a1),var(--a2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#fff;text-decoration:none;flex-shrink:0}
+.nav-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;flex:1}
+.nav-dash{width:32px;height:32px;background:var(--s2);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--muted);font-size:14px;transition:all .2s;flex-shrink:0}
+.nav-dash:hover{color:var(--text);border-color:var(--border2)}
+
+/* OYUN SEÇİM */
+.page{max-width:680px;margin:0 auto;padding:16px}
+.section-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;margin-top:4px}
+.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.game-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:18px 14px;cursor:pointer;transition:all .2s;text-align:center;position:relative;overflow:hidden}
+.game-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--a1),var(--a2));opacity:0;transition:opacity .2s}
+.game-card:hover::before{opacity:.06}
+.game-card:active{transform:scale(.97)}
+.game-icon{font-size:36px;margin-bottom:8px;display:block}
+.game-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
+.game-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.game-badge{position:absolute;top:10px;right:10px;background:var(--a1);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.04em}
+
+/* OYUN ALANI */
+.game-area{display:none;flex-direction:column;align-items:center;padding-bottom:40px}
+.game-area.active{display:flex}
+
+.game-header{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.back-btn{width:36px;height:36px;background:var(--s2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--muted);transition:all .2s;flex-shrink:0}
+.back-btn:hover{color:var(--text)}
+.game-header-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;flex:1}
+.score-box{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:6px 14px;text-align:center}
+.score-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.score-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--a1)}
+
+/* ===== 2048 ===== */
+#g2048{width:100%}
+.g2048-top{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;width:100%}
+.g2048-scores{display:flex;gap:8px}
+.new-btn{padding:8px 16px;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer}
+.board-2048{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--s2);border-radius:14px;padding:10px;width:100%;max-width:360px;margin:0 auto;touch-action:none}
+.cell-2048{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(14px,4vw,22px);background:var(--bg);border:1px solid var(--border);transition:background .15s,color .15s}
+.c2{background:#eee4da;color:#776e65}
+.c4{background:#ede0c8;color:#776e65}
+.c8{background:#f2b179;color:#fff}
+.c16{background:#f59563;color:#fff}
+.c32{background:#f67c5f;color:#fff}
+.c64{background:#f65e3b;color:#fff}
+.c128{background:#edcf72;color:#fff}
+.c256{background:#edcc61;color:#fff}
+.c512{background:#edc850;color:#fff}
+.c1024{background:#edc53f;color:#fff}
+.c2048{background:#edc22e;color:#fff;box-shadow:0 0 20px rgba(237,194,46,.5)}
+.chigh{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;box-shadow:0 0 20px rgba(99,102,241,.4)}
+
+/* ===== SNAKE ===== */
+#gSnake{width:100%;display:flex;flex-direction:column;align-items:center}
+#snakeCanvas{border-radius:14px;border:2px solid var(--border);background:#0a0b15;max-width:100%;touch-action:none}
+.snake-controls{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,56px);gap:8px;margin-top:16px}
+.sc-btn{width:56px;height:56px;background:var(--s2);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all .15s;user-select:none;-webkit-user-select:none}
+.sc-btn:active{background:var(--a1);color:#fff;transform:scale(.93)}
+.snake-status{font-size:13px;color:var(--muted);margin-top:10px}
+
+/* ===== TAHMİN KELİME ===== */
+#gWord{width:100%;display:flex;flex-direction:column;align-items:center}
+.word-grid{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.word-row{display:flex;gap:6px}
+.word-cell{width:52px;height:52px;border:2px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;transition:background .3s,border-color .3s}
+.word-cell.correct{background:#538d4e;border-color:#538d4e;color:#fff}
+.word-cell.present{background:#b59f3b;border-color:#b59f3b;color:#fff}
+.word-cell.absent{background:var(--s2);border-color:var(--s2);color:var(--muted)}
+.word-cell.current{border-color:var(--a1)}
+.word-keyboard{display:flex;flex-direction:column;gap:6px;width:100%}
+.word-kb-row{display:flex;gap:4px;justify-content:center}
+.kb-key{min-width:30px;height:44px;padding:0 6px;background:var(--s2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--text);user-select:none;-webkit-user-select:none}
+.kb-key:active{transform:scale(.92)}
+.kb-key.wide{min-width:52px;font-size:11px}
+.kb-key.correct{background:#538d4e;color:#fff;border-color:#538d4e}
+.kb-key.present{background:#b59f3b;color:#fff;border-color:#b59f3b}
+.kb-key.absent{background:var(--bg);color:var(--muted);border-color:var(--border)}
+.word-msg{font-size:13px;font-weight:600;min-height:20px;color:var(--a2);margin-bottom:8px}
+
+/* OVERLAY */
+.game-over{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.game-over.show{display:flex}
+.go-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:32px 24px;text-align:center;max-width:280px;width:90%}
+.go-icon{font-size:52px;margin-bottom:12px}
+.go-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px}
+.go-sub{font-size:14px;color:var(--muted);margin-bottom:20px}
+.go-btn{padding:12px 28px;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin:4px}
+.go-btn2{padding:12px 28px;background:var(--s2);color:var(--text);border:1px solid var(--border);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin:4px}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-avatar" id="navAvatar" href="highly-profil.html">?</a>
+  <span class="nav-title">🎮 Oyunlar</span>
+  <a class="nav-dash" href="index.html" title="Dashboard">⊞</a>
+</nav>
+
+<div class="page" id="mainPage">
+  <div class="section-title">Mini Oyunlar</div>
+  <div class="game-grid">
+    <div class="game-card" onclick="startGame('2048')">
+      <span class="game-icon">🟦</span>
+      <div class="game-name">2048</div>
+      <div class="game-desc">Kaydır, birleştir, 2048'e ulaş!</div>
+    </div>
+    <div class="game-card" onclick="startGame('snake')">
+      <span class="game-icon">🐍</span>
+      <div class="game-name">Yılan</div>
+      <div class="game-desc">Yemi topla, duvara çarpma!</div>
+    </div>
+    <div class="game-card" onclick="startGame('word')">
+      <span class="game-icon">🔤</span>
+      <div class="game-name">Kelime Bul</div>
+      <div class="game-desc">5 harfli Türkçe kelimeyi tahmin et</div>
+      <div class="game-badge">TR</div>
+    </div>
+    <div class="game-card" onclick="startGame('memory')">
+      <span class="game-icon">🃏</span>
+      <div class="game-name">Hafıza</div>
+      <div class="game-desc">Eşleşen kartları bul!</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2048 -->
+<div class="game-area" id="area2048">
+  <div class="game-header" style="width:100%;max-width:380px">
+    <div class="back-btn" onclick="backToMenu()">←</div>
+    <div class="game-header-title">2048</div>
+    <div class="g2048-scores">
+      <div class="score-box"><div class="score-label">Puan</div><div class="score-val" id="score2048">0</div></div>
+      <div class="score-box"><div class="score-label">En İyi</div><div class="score-val" id="best2048">0</div></div>
+    </div>
+    <button class="new-btn" onclick="init2048()">Yeni</button>
+  </div>
+  <div id="g2048"><div class="board-2048" id="board2048"></div></div>
+</div>
+
+<!-- Snake -->
+<div class="game-area" id="areaSnake">
+  <div class="game-header" style="width:100%;max-width:380px">
+    <div class="back-btn" onclick="backToMenu()">←</div>
+    <div class="game-header-title">🐍 Yılan</div>
+    <div class="score-box"><div class="score-label">Puan</div><div class="score-val" id="scoreSnake">0</div></div>
+  </div>
+  <div id="gSnake">
+    <canvas id="snakeCanvas" width="320" height="320"></canvas>
+    <div class="snake-status" id="snakeStatus">Başlamak için ▶ tuşuna bas</div>
+    <div class="snake-controls">
+      <div></div>
+      <div class="sc-btn" ontouchstart="snakeDir('UP')" onclick="snakeDir('UP')">▲</div>
+      <div></div>
+      <div class="sc-btn" ontouchstart="snakeDir('LEFT')" onclick="snakeDir('LEFT')">◀</div>
+      <div class="sc-btn" ontouchstart="snakeStart()" onclick="snakeStart()" id="snakePlayBtn">▶</div>
+      <div class="sc-btn" ontouchstart="snakeDir('RIGHT')" onclick="snakeDir('RIGHT')">▶</div>
+      <div></div>
+      <div class="sc-btn" ontouchstart="snakeDir('DOWN')" onclick="snakeDir('DOWN')">▼</div>
+      <div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Kelime -->
+<div class="game-area" id="areaWord">
+  <div class="game-header" style="width:100%;max-width:380px">
+    <div class="back-btn" onclick="backToMenu()">←</div>
+    <div class="game-header-title">🔤 Kelime Bul</div>
+    <button class="new-btn" onclick="initWord()">Yeni</button>
+  </div>
+  <div id="gWord">
+    <div class="word-msg" id="wordMsg"></div>
+    <div class="word-grid" id="wordGrid"></div>
+    <div class="word-keyboard" id="wordKb"></div>
+  </div>
+</div>
+
+<!-- Hafıza -->
+<div class="game-area" id="areaMemory">
+  <div class="game-header" style="width:100%;max-width:380px">
+    <div class="back-btn" onclick="backToMenu()">←</div>
+    <div class="game-header-title">🃏 Hafıza</div>
+    <div class="score-box"><div class="score-label">Hamle</div><div class="score-val" id="memMoves">0</div></div>
+  </div>
+  <div id="gMemory" style="width:100%;max-width:380px"></div>
+</div>
+
+<!-- Game Over Overlay -->
+<div class="game-over" id="gameOver">
+  <div class="go-card">
+    <div class="go-icon" id="goIcon">😵</div>
+    <div class="go-title" id="goTitle">Oyun Bitti!</div>
+    <div class="go-sub" id="goSub"></div>
+    <div>
+      <button class="go-btn" id="goReplay" onclick="replayGame()">Tekrar Oyna</button>
+      <button class="go-btn2" onclick="closeGameOver()">Ana Menü</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tema + Avatar
+(function(){
+  var t=localStorage.getItem('highly_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  try{
+    var u=JSON.parse(localStorage.getItem('highly_user')||'{}');
+    var av=document.getElementById('navAvatar');
+    if(u.avatarEmoji){av.textContent=u.avatarEmoji;av.style.background='transparent';av.style.fontSize='22px';}
+    else if(u.name){av.textContent=u.name[0].toUpperCase();}
+  }catch(e){}
+})();
+
+var currentGame = null;
+
+function startGame(name){
+  currentGame = name;
+  document.getElementById('mainPage').style.display = 'none';
+  document.querySelectorAll('.game-area').forEach(function(a){ a.classList.remove('active'); });
+  if(name==='2048'){ document.getElementById('area2048').classList.add('active'); init2048(); }
+  if(name==='snake'){ document.getElementById('areaSnake').classList.add('active'); initSnake(); }
+  if(name==='word'){ document.getElementById('areaWord').classList.add('active'); initWord(); }
+  if(name==='memory'){ document.getElementById('areaMemory').classList.add('active'); initMemory(); }
+  window.scrollTo(0,0);
+}
+
+function backToMenu(){
+  snakeStop();
+  document.querySelectorAll('.game-area').forEach(function(a){ a.classList.remove('active'); });
+  document.getElementById('mainPage').style.display = 'block';
+  currentGame = null;
+}
+
+function showGameOver(icon, title, sub, replayFn){
+  document.getElementById('goIcon').textContent = icon;
+  document.getElementById('goTitle').textContent = title;
+  document.getElementById('goSub').textContent = sub;
+  window._replayFn = replayFn;
+  document.getElementById('gameOver').classList.add('show');
+}
+
+function replayGame(){ 
+  document.getElementById('gameOver').classList.remove('show');
+  if(window._replayFn) window._replayFn();
+}
+
+function closeGameOver(){
+  document.getElementById('gameOver').classList.remove('show');
+  backToMenu();
+}
+
+/* ===================== 2048 ===================== */
+var board, score2048, best2048 = parseInt(localStorage.getItem('best2048')||'0');
+
+function init2048(){
+  board = Array(16).fill(0);
+  score2048 = 0;
+  addTile(); addTile();
+  render2048();
+  document.getElementById('best2048').textContent = best2048;
+}
+
+function addTile(){
+  var empty = board.map(function(v,i){return v===0?i:-1;}).filter(function(i){return i>=0;});
+  if(!empty.length) return;
+  var idx = empty[Math.floor(Math.random()*empty.length)];
+  board[idx] = Math.random()<.9?2:4;
+}
+
+function render2048(){
+  var el = document.getElementById('board2048');
+  el.innerHTML = board.map(function(v){
+    var cls = v===0?'':('c'+(v>2048?'high':v));
+    return '<div class="cell-2048 '+cls+'">'+(v||'')+'</div>';
+  }).join('');
+  document.getElementById('score2048').textContent = score2048;
+  if(score2048 > best2048){ best2048=score2048; localStorage.setItem('best2048',best2048); document.getElementById('best2048').textContent=best2048; }
+}
+
+function slide(row){
+  var r = row.filter(function(v){return v;});
+  for(var i=0;i<r.length-1;i++){
+    if(r[i]===r[i+1]){ r[i]*=2; score2048+=r[i]; r.splice(i+1,1); }
+  }
+  while(r.length<4) r.push(0);
+  return r;
+}
+
+function move2048(dir){
+  var prev = board.slice();
+  var b = board.slice();
+  if(dir==='LEFT'){ for(var i=0;i<4;i++){ var row=b.slice(i*4,i*4+4); row=slide(row); for(var j=0;j<4;j++) b[i*4+j]=row[j]; } }
+  if(dir==='RIGHT'){ for(var i=0;i<4;i++){ var row=b.slice(i*4,i*4+4).reverse(); row=slide(row); row.reverse(); for(var j=0;j<4;j++) b[i*4+j]=row[j]; } }
+  if(dir==='UP'){ for(var j=0;j<4;j++){ var col=[b[j],b[j+4],b[j+8],b[j+12]]; col=slide(col); [b[j],b[j+4],b[j+8],b[j+12]]=col; } }
+  if(dir==='DOWN'){ for(var j=0;j<4;j++){ var col=[b[j+12],b[j+8],b[j+4],b[j]]; col=slide(col); [b[j+12],b[j+8],b[j+4],b[j]]=col; } }
+  var changed = b.some(function(v,i){return v!==prev[i];});
+  if(changed){ board=b; addTile(); render2048(); }
+  if(board.indexOf(2048)>=0){ showGameOver('🏆','2048!','Tebrikler! Skoru: '+score2048, init2048); return; }
+  if(!canMove()){ showGameOver('😵','Oyun Bitti!','Skor: '+score2048, init2048); }
+}
+
+function canMove(){
+  if(board.indexOf(0)>=0) return true;
+  for(var i=0;i<4;i++) for(var j=0;j<4;j++){
+    var v=board[i*4+j];
+    if(j<3&&v===board[i*4+j+1]) return true;
+    if(i<3&&v===board[(i+1)*4+j]) return true;
+  }
+  return false;
+}
+
+// 2048 swipe
+var t2Start={};
+document.addEventListener('touchstart',function(e){
+  if(!document.getElementById('area2048').classList.contains('active')) return;
+  t2Start={x:e.touches[0].clientX,y:e.touches[0].clientY};
+},{passive:true});
+document.addEventListener('touchend',function(e){
+  if(!document.getElementById('area2048').classList.contains('active')) return;
+  var dx=e.changedTouches[0].clientX-t2Start.x, dy=e.changedTouches[0].clientY-t2Start.y;
+  if(Math.abs(dx)<20&&Math.abs(dy)<20) return;
+  if(Math.abs(dx)>Math.abs(dy)) move2048(dx>0?'RIGHT':'LEFT');
+  else move2048(dy>0?'DOWN':'UP');
+},{passive:true});
+document.addEventListener('keydown',function(e){
+  if(!document.getElementById('area2048').classList.contains('active')) return;
+  var map={'ArrowLeft':'LEFT','ArrowRight':'RIGHT','ArrowUp':'UP','ArrowDown':'DOWN'};
+  if(map[e.key]){e.preventDefault();move2048(map[e.key]);}
+});
+
+/* ===================== SNAKE ===================== */
+var snakeGame={running:false,loop:null,snake:[],dir:'RIGHT',nextDir:'RIGHT',food:{x:0,y:0},sc:0};
+var CELL=20, COLS=16, ROWS=16;
+
+function initSnake(){
+  var canvas=document.getElementById('snakeCanvas');
+  var size=Math.min(window.innerWidth-48,320);
+  canvas.width=canvas.height=Math.floor(size/COLS)*COLS;
+  CELL=canvas.width/COLS;
+  snakeGame.running=false;
+  snakeGame.snake=[{x:8,y:8},{x:7,y:8},{x:6,y:8}];
+  snakeGame.dir=snakeGame.nextDir='RIGHT';
+  snakeGame.sc=0;
+  document.getElementById('scoreSnake').textContent='0';
+  document.getElementById('snakeStatus').textContent='Başlamak için ▶ tuşuna bas';
+  drawSnake();
+}
+
+function snakeStart(){
+  if(snakeGame.running) return;
+  snakeGame.running=true;
+  document.getElementById('snakeStatus').textContent='';
+  if(snakeGame.loop) clearInterval(snakeGame.loop);
+  placeFood();
+  snakeGame.loop=setInterval(snakeTick,130);
+}
+
+function snakeStop(){ snakeGame.running=false; if(snakeGame.loop) clearInterval(snakeGame.loop); }
+
+function snakeDir(d){
+  var opp={UP:'DOWN',DOWN:'UP',LEFT:'RIGHT',RIGHT:'LEFT'};
+  if(d!==opp[snakeGame.dir]) snakeGame.nextDir=d;
+  if(!snakeGame.running) snakeStart();
+}
+
+function placeFood(){
+  var occupied=snakeGame.snake.map(function(s){return s.x+','+s.y;});
+  var x,y;
+  do{ x=Math.floor(Math.random()*COLS); y=Math.floor(Math.random()*ROWS); }
+  while(occupied.indexOf(x+','+y)>=0);
+  snakeGame.food={x:x,y:y};
+}
+
+function snakeTick(){
+  snakeGame.dir=snakeGame.nextDir;
+  var head=snakeGame.snake[0];
+  var nHead={x:head.x,y:head.y};
+  if(snakeGame.dir==='RIGHT') nHead.x++;
+  if(snakeGame.dir==='LEFT') nHead.x--;
+  if(snakeGame.dir==='UP') nHead.y--;
+  if(snakeGame.dir==='DOWN') nHead.y++;
+  if(nHead.x<0||nHead.x>=COLS||nHead.y<0||nHead.y>=ROWS){ snakeStop(); showGameOver('🐍','Çarptın!','Skor: '+snakeGame.sc, function(){initSnake();}); return; }
+  if(snakeGame.snake.some(function(s){return s.x===nHead.x&&s.y===nHead.y;})){ snakeStop(); showGameOver('🐍','Kendine çarptın!','Skor: '+snakeGame.sc, function(){initSnake();}); return; }
+  snakeGame.snake.unshift(nHead);
+  if(nHead.x===snakeGame.food.x&&nHead.y===snakeGame.food.y){ snakeGame.sc+=10; document.getElementById('scoreSnake').textContent=snakeGame.sc; placeFood(); }
+  else snakeGame.snake.pop();
+  drawSnake();
+}
+
+function drawSnake(){
+  var canvas=document.getElementById('snakeCanvas');
+  var ctx=canvas.getContext('2d');
+  ctx.fillStyle='#0a0b15'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Food
+  ctx.fillStyle='#f65e3b';
+  ctx.beginPath(); ctx.arc(snakeGame.food.x*CELL+CELL/2,snakeGame.food.y*CELL+CELL/2,CELL/2-2,0,Math.PI*2); ctx.fill();
+  // Snake
+  snakeGame.snake.forEach(function(s,i){
+    ctx.fillStyle=i===0?'#818cf8':'#6366f1';
+    ctx.beginPath(); ctx.roundRect(s.x*CELL+1,s.y*CELL+1,CELL-2,CELL-2,4); ctx.fill();
+  });
+}
+
+// Snake klavye
+document.addEventListener('keydown',function(e){
+  if(!document.getElementById('areaSnake').classList.contains('active')) return;
+  var map={'ArrowUp':'UP','ArrowDown':'DOWN','ArrowLeft':'LEFT','ArrowRight':'RIGHT',' ':'START'};
+  if(map[e.key]){ e.preventDefault(); if(map[e.key]==='START') snakeStart(); else snakeDir(map[e.key]); }
+});
+
+// Snake swipe
+var snakeSwipe={};
+document.getElementById('snakeCanvas') && document.getElementById('snakeCanvas').addEventListener('touchstart',function(e){ snakeSwipe={x:e.touches[0].clientX,y:e.touches[0].clientY}; },{passive:true});
+document.getElementById('snakeCanvas') && document.getElementById('snakeCanvas').addEventListener('touchend',function(e){ var dx=e.changedTouches[0].clientX-snakeSwipe.x,dy=e.changedTouches[0].clientY-snakeSwipe.y; if(Math.abs(dx)<15&&Math.abs(dy)<15){snakeStart();return;} if(Math.abs(dx)>Math.abs(dy)) snakeDir(dx>0?'RIGHT':'LEFT'); else snakeDir(dy>0?'DOWN':'UP'); },{passive:true});
+
+/* ===================== KELİME BUL ===================== */
+var WORDS=['KALEM','MASA','KAPI','ARABA','DENIZ','BULUT','YILDIZ','NEHIR','KITAP','OYUN','BALIK','KUZEY','GUNEY','DOĞU','BATI','ŞEKER','ELMA','ARMUT','LIMON','PORTAKAL','BEBEK','ÇIÇEK','YORUM','SALON','MUTFAK','BAHÇE','SOKAK','CADDE','ASFALT','TOPRAK','YAPRAK','DALGA','RÜZGAR','FIRTINA','YAĞMUR','KARLAR','BAHAR','YAZ','KIS','SONBAHAR'].filter(function(w){return w.length===5;});
+var wordTarget, wordGuesses, wordCurrent, wordDone;
+
+function initWord(){
+  wordTarget = WORDS[Math.floor(Math.random()*WORDS.length)];
+  wordGuesses = [];
+  wordCurrent = '';
+  wordDone = false;
+  document.getElementById('wordMsg').textContent = '';
+  buildWordGrid();
+  buildWordKb();
+}
+
+function buildWordGrid(){
+  var el=document.getElementById('wordGrid');
+  var html='';
+  for(var r=0;r<6;r++){
+    html+='<div class="word-row">';
+    for(var c=0;c<5;c++) html+='<div class="word-cell" id="wc_'+r+'_'+c+'"></div>';
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+
+function buildWordKb(){
+  var rows=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['SİL','Z','X','C','V','B','N','M','GİR']];
+  var el=document.getElementById('wordKb');
+  el.innerHTML=rows.map(function(row){
+    return '<div class="word-kb-row">'+row.map(function(k){
+      return '<div class="kb-key'+(k.length>1?' wide':'')+'" id="kb_'+k+'" onclick="wordKey(\''+k+'\')">'+k+'</div>';
+    }).join('')+'</div>';
+  }).join('');
+}
+
+function wordKey(k){
+  if(wordDone) return;
+  if(k==='SİL'){ wordCurrent=wordCurrent.slice(0,-1); }
+  else if(k==='GİR'){
+    if(wordCurrent.length<5){ document.getElementById('wordMsg').textContent='5 harf gir!'; return; }
+    submitWord();
+    return;
+  } else {
+    if(wordCurrent.length<5) wordCurrent+=k;
+  }
+  updateWordRow();
+}
+
+function updateWordRow(){
+  var row=wordGuesses.length;
+  for(var c=0;c<5;c++){
+    var cell=document.getElementById('wc_'+row+'_'+c);
+    cell.textContent=wordCurrent[c]||'';
+    cell.className='word-cell'+(wordCurrent[c]?' current':'');
+  }
+}
+
+function submitWord(){
+  var guess=wordCurrent;
+  var target=wordTarget;
+  var result=[];
+  var used=Array(5).fill(false);
+  // Correct pass
+  for(var i=0;i<5;i++){
+    if(guess[i]===target[i]){ result[i]='correct'; used[i]=true; }
+    else result[i]='absent';
+  }
+  // Present pass
+  for(var i=0;i<5;i++){
+    if(result[i]==='correct') continue;
+    for(var j=0;j<5;j++){
+      if(!used[j]&&guess[i]===target[j]){ result[i]='present'; used[j]=true; break; }
+    }
+  }
+  var row=wordGuesses.length;
+  for(var c=0;c<5;c++){
+    var cell=document.getElementById('wc_'+row+'_'+c);
+    cell.textContent=guess[c];
+    cell.className='word-cell '+result[c];
+    // Update kb
+    var kb=document.getElementById('kb_'+guess[c]);
+    if(kb){
+      if(result[c]==='correct') kb.className='kb-key correct';
+      else if(result[c]==='present'&&!kb.classList.contains('correct')) kb.className='kb-key present';
+      else if(result[c]==='absent'&&!kb.classList.contains('correct')&&!kb.classList.contains('present')) kb.className='kb-key absent';
+    }
+  }
+  wordGuesses.push(guess);
+  wordCurrent='';
+  if(guess===target){
+    wordDone=true;
+    document.getElementById('wordMsg').textContent='🎉 Tebrikler! '+wordGuesses.length+'. denemede buldun!';
+    return;
+  }
+  if(wordGuesses.length>=6){
+    wordDone=true;
+    document.getElementById('wordMsg').textContent='😔 Kelime: '+target;
+  }
+}
+
+document.addEventListener('keydown',function(e){
+  if(!document.getElementById('areaWord').classList.contains('active')) return;
+  if(e.key==='Backspace'){ wordKey('SİL'); return; }
+  if(e.key==='Enter'){ wordKey('GİR'); return; }
+  var k=e.key.toUpperCase();
+  if(k.length===1&&k>='A'&&k<='Z') wordKey(k);
+});
+
+/* ===================== HAFIZA ===================== */
+var memCards=[], memFlipped=[], memMatched=0, memMoves=0, memLock=false;
+var MEM_EMOJIS=['🍎','🚀','🎵','🌈','⚡','🦁','🎯','🍕'];
+
+function initMemory(){
+  memMatched=0; memMoves=0; memLock=false; memFlipped=[];
+  document.getElementById('memMoves').textContent='0';
+  var pairs=MEM_EMOJIS.concat(MEM_EMOJIS);
+  pairs.sort(function(){return Math.random()-.5;});
+  memCards=pairs.map(function(e,i){return{id:i,emoji:e,flipped:false,matched:false};});
+  renderMemory();
+}
+
+function renderMemory(){
+  var el=document.getElementById('gMemory');
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%">'
+    +memCards.map(function(c){
+      return '<div onclick="flipCard('+c.id+')" style="aspect-ratio:1;background:'+(c.flipped||c.matched?'linear-gradient(135deg,var(--a1),var(--a2))':'var(--s2)')+';border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all .2s">'
+        +(c.flipped||c.matched?c.emoji:'')
+        +'</div>';
+    }).join('')
+    +'</div>';
+}
+
+function flipCard(id){
+  if(memLock) return;
+  var card=memCards[id];
+  if(card.flipped||card.matched) return;
+  card.flipped=true;
+  memFlipped.push(id);
+  renderMemory();
+  if(memFlipped.length===2){
+    memLock=true; memMoves++;
+    document.getElementById('memMoves').textContent=memMoves;
+    var a=memCards[memFlipped[0]], b=memCards[memFlipped[1]];
+    if(a.emoji===b.emoji){
+      a.matched=b.matched=true; a.flipped=b.flipped=false;
+      memFlipped=[]; memMatched+=2; memLock=false;
+      renderMemory();
+      if(memMatched===memCards.length) showGameOver('🎉','Tebrikler!',memMoves+' hamlede tamamladın!', initMemory);
+    } else {
+      setTimeout(function(){ a.flipped=b.flipped=false; memFlipped=[]; memLock=false; renderMemory(); },900);
+    }
+  }
+}
+</script>
+</body>
+</html>
