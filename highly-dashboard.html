@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>Highly — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+[data-theme="dark"]{
+  --bg:#06070f;--s1:#0b0d1c;--s2:#0f1125;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8e8ff;--muted:#4a4d6a;--text2:#9ca3c8;
+  --nav:#06070f;--a1:#6366f1;--a2:#a78bfa;
+}
+[data-theme="glass"]{
+  --bg:linear-gradient(135deg,#0a0f2e,#0d1635);
+  --s1:rgba(255,255,255,0.06);--s2:rgba(255,255,255,0.1);
+  --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.2);
+  --text:#f0f4ff;--muted:rgba(255,255,255,0.45);--text2:rgba(255,255,255,0.7);
+  --nav:rgba(10,15,46,0.8);--a1:#818cf8;--a2:#c4b5fd;
+}
+[data-theme="light"]{
+  --bg:#f5f6fa;--s1:#ffffff;--s2:#f0f1f8;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1a1b2e;--muted:#9095b0;--text2:#6b6f8e;
+  --nav:#ffffff;--a1:#6366f1;--a2:#4f46e5;
+}
+
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:var(--nav);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px}
+.nav-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;flex:1;background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
+.nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--a1),var(--a2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#fff;text-decoration:none;flex-shrink:0}
+
+/* PAGE */
+.page{max-width:680px;margin:0 auto;padding:16px}
+
+/* WELCOME */
+.welcome{background:linear-gradient(135deg,var(--a1),var(--a2));border-radius:20px;padding:20px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden}
+.welcome::before{content:'✦';position:absolute;right:16px;top:10px;font-size:48px;opacity:.15}
+.welcome-greet{font-size:13px;opacity:.85;margin-bottom:4px}
+.welcome-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:800}
+.welcome-sub{font-size:12px;opacity:.75;margin-top:4px}
+
+/* SECTION */
+.section-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;margin-top:4px}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:16px 14px;text-decoration:none;color:var(--text);transition:all .2s;position:relative;overflow:hidden;cursor:pointer;display:block}
+.card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--a1),var(--a2));opacity:0;transition:opacity .2s}
+.card:hover::before{opacity:.06}
+.card:active{transform:scale(.97)}
+.card-icon{font-size:28px;margin-bottom:8px;display:block;position:relative}
+.card-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:3px;position:relative}
+.card-desc{font-size:11px;color:var(--muted);line-height:1.4;position:relative}
+.card-badge{position:absolute;top:10px;right:10px;background:var(--a1);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px}
+.card.wide{grid-column:span 2}
+
+/* QUICK STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-box{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center}
+.stat-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+
+/* THEME SWITCHER */
+.theme-row{display:flex;gap:8px;margin-bottom:20px}
+.theme-btn{flex:1;background:var(--s1);border:1px solid var(--border);color:var(--text2);padding:9px 6px;border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;cursor:pointer;transition:all .2s;text-align:center}
+.theme-btn:hover{border-color:var(--a1);color:var(--a1)}
+.theme-btn.active{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">highly</a>
+  <a class="nav-avatar" id="navAvatar" href="highly-profil.html">?</a>
+</nav>
+
+<div class="page">
+
+  <!-- WELCOME -->
+  <div class="welcome">
+    <div class="welcome-greet">Hoş geldin 👋</div>
+    <div class="welcome-name" id="welcomeName">Highly'ye</div>
+    <div class="welcome-sub" id="welcomeDate">—</div>
+  </div>
+
+  <!-- QUICK STATS -->
+  <div class="section-title">Özet</div>
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-val" id="statPosts">—</div>
+      <div class="stat-label">Gönderi</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="statFriends">—</div>
+      <div class="stat-label">Arkadaş</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="statMsgs">—</div>
+      <div class="stat-label">Mesaj</div>
+    </div>
+  </div>
+
+  <!-- SERVİSLER -->
+  <div class="section-title">Servisler</div>
+  <div class="grid">
+    <a class="card" href="highly-feed.html">
+      <span class="card-icon">💬</span>
+      <div class="card-name">Feed</div>
+      <div class="card-desc">Gönderi paylaş, arkadaşlarını takip et</div>
+      <div class="card-badge">YENİ</div>
+    </a>
+    <a class="card" href="highly-mesajlar.html">
+      <span class="card-icon">✉️</span>
+      <div class="card-name">Mesajlar</div>
+      <div class="card-desc">Özel mesajlaş</div>
+    </a>
+    <a class="card" href="highly-arkadaslar.html">
+      <span class="card-icon">👥</span>
+      <div class="card-name">Arkadaşlar</div>
+      <div class="card-desc">Bağlantılarını yönet</div>
+    </a>
+    <a class="card" href="highly-gene3.html">
+      <span class="card-icon">🤖</span>
+      <div class="card-name">Gene 3.0</div>
+      <div class="card-desc">AI asistan</div>
+    </a>
+    <a class="card" href="highly-hava.html">
+      <span class="card-icon">🌤️</span>
+      <div class="card-name">Hava Durumu</div>
+      <div class="card-desc">Anlık hava bilgisi</div>
+    </a>
+    <a class="card" href="highly-haberler.html">
+      <span class="card-icon">📰</span>
+      <div class="card-name">Haberler</div>
+      <div class="card-desc">Güncel Türkçe haberler</div>
+    </a>
+    <a class="card" href="highly-arama.html">
+      <span class="card-icon">🔍</span>
+      <div class="card-name">Arama</div>
+      <div class="card-desc">Web'de ara</div>
+    </a>
+    <a class="card" href="highly-oyunlar.html">
+      <span class="card-icon">🎮</span>
+      <div class="card-name">Oyunlar</div>
+      <div class="card-desc">2048, Yılan ve daha fazlası</div>
+    </a>
+  </div>
+
+  <!-- TEMA -->
+  <div class="section-title">Tema</div>
+  <div class="theme-row">
+    <button class="theme-btn" id="thDark" onclick="setTheme('dark')">🌑 Koyu</button>
+    <button class="theme-btn" id="thGlass" onclick="setTheme('glass')">🔮 Cam</button>
+    <button class="theme-btn" id="thLight" onclick="setTheme('light')">☀️ Açık</button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var SB_URL = 'SUPABASE_URL_BURAYA';
+var SB_KEY = 'SUPABASE_ANON_KEY_BURAYA';
+var _sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+// TEMA
+(function(){
+  var t = localStorage.getItem('highly_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  var map = {dark:'thDark', glass:'thGlass', light:'thLight'};
+  if (map[t]) document.getElementById(map[t]).classList.add('active');
+})();
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('highly_theme', t);
+  ['thDark','thGlass','thLight'].forEach(function(id){ document.getElementById(id).classList.remove('active'); });
+  var map = {dark:'thDark', glass:'thGlass', light:'thLight'};
+  if (map[t]) document.getElementById(map[t]).classList.add('active');
+}
+
+// AVATAR + İSİM
+(function(){
+  var u = {};
+  try { u = JSON.parse(localStorage.getItem('highly_user') || '{}'); } catch(e){}
+  var av = document.getElementById('navAvatar');
+  if (u.avatarEmoji) { av.textContent = u.avatarEmoji; av.style.background = 'transparent'; av.style.fontSize = '20px'; }
+  else if (u.name) { av.textContent = u.name[0].toUpperCase(); }
+
+  var wn = document.getElementById('welcomeName');
+  if (u.name) wn.textContent = u.name + '\'e hoş geldin!';
+
+  // Tarih
+  var now = new Date();
+  var days = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+  var months = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+  document.getElementById('welcomeDate').textContent =
+    days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+})();
+
+// STATS
+async function loadStats() {
+  var res = await _sb.auth.getSession();
+  var user = res.data.session ? res.data.session.user : null;
+  if (!user) return;
+
+  // Gönderi sayısı
+  var p = await _sb.from('posts').select('id', {count:'exact', head:true}).eq('user_id', user.id);
+  document.getElementById('statPosts').textContent = p.count || 0;
+
+  // Arkadaş sayısı
+  var f = await _sb.from('friends').select('id', {count:'exact', head:true})
+    .or('user_id.eq.' + user.id + ',friend_id.eq.' + user.id)
+    .eq('status', 'accepted');
+  document.getElementById('statFriends').textContent = f.count || 0;
+
+  // Mesaj sayısı
+  var m = await _sb.from('messages').select('id', {count:'exact', head:true})
+    .or('sender_id.eq.' + user.id + ',receiver_id.eq.' + user.id);
+  document.getElementById('statMsgs').textContent = m.count || 0;
+}
+
+loadStats();
+</script>
+</body>
+</html>
