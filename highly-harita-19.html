@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>Highly Harita</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1842711344931829" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#06080f;--s1:#0c0f1e;--border:rgba(255,255,255,0.08);--accent:#34d399;--accent2:#818cf8;--accent3:#f59e0b;--text:#e8f0ff;--muted:#4a5068}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+#map{position:fixed;inset:0;z-index:0}
+.leaflet-tile{filter:brightness(0.75) saturate(0.7) hue-rotate(180deg) invert(1)}
+.leaflet-container{background:var(--bg)}
+.leaflet-control-zoom{border:1px solid var(--border)!important;border-radius:12px!important;overflow:hidden;margin-bottom:140px!important}
+.leaflet-control-zoom a{background:rgba(12,15,30,.95)!important;color:var(--text)!important;border-color:var(--border)!important}
+.leaflet-routing-container{display:none!important}
+.top-right{position:fixed;top:16px;right:16px;z-index:1000;display:flex;align-items:center;gap:10px}
+.avatar-btn{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.15)}
+.back-btn{background:rgba(12,15,30,.9);border:1px solid var(--border);border-radius:12px;padding:8px 14px;color:var(--muted);text-decoration:none;font-size:13px;backdrop-filter:blur(20px)}
+.top-left{position:fixed;top:16px;left:16px;z-index:1000}
+.logo-badge{display:flex;align-items:center;gap:8px;background:rgba(12,15,30,.9);border:1px solid var(--border);border-radius:12px;padding:8px 14px;backdrop-filter:blur(20px);text-decoration:none;color:var(--text)}
+.logo-icon{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:#fff}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:15px}
+.search-bar{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:1000;width:min(480px,calc(100vw - 160px))}
+.search-wrap{display:flex;align-items:center;gap:8px;background:rgba(12,15,30,.95);border:1px solid var(--border);border-radius:999px;padding:8px 8px 8px 18px;backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.search-input{flex:1;background:none;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none}
+.search-input::placeholder{color:var(--muted)}
+.search-go{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#000;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.loc-btn{width:36px;height:36px;border-radius:50%;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);color:var(--accent);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* bottom sheet - ana */
+.bottom-sheet{position:fixed;bottom:0;left:0;right:0;z-index:500;background:rgba(12,15,30,.98);border-radius:20px 20px 0 0;border-top:1px solid var(--border);backdrop-filter:blur(30px);transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateY(calc(100% - 80px))}
+.bottom-sheet.expanded{transform:translateY(0)}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--muted);margin:12px auto 0}
+.sheet-peek{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 8px;cursor:pointer}
+.sheet-peek-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px}
+.sheet-peek-hint{font-size:12px;color:var(--muted)}
+.sheet-content{padding:0 16px 32px;max-height:60vh;overflow-y:auto}
+.bottom-nav{display:flex;gap:6px;padding:8px 12px 12px;border-bottom:1px solid var(--border);overflow-x:auto}
+.bnav-btn{flex:0 0 auto;padding:9px 10px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:11px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;text-align:center;transition:all .2s;white-space:nowrap}
+.bnav-btn.active{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.3);color:var(--accent)}
+.panel{display:none}
+.panel.show{display:block}
+/* Arama */
+.result-item{display:flex;align-items:flex-start;gap:10px;padding:12px 4px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;border-radius:10px}
+.result-item:hover{background:rgba(255,255,255,.04);padding:12px 8px}
+.result-icon{width:36px;height:36px;border-radius:10px;background:rgba(52,211,153,.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.result-name{font-weight:600;font-size:13px;margin-bottom:2px}
+.result-addr{font-size:11px;color:var(--muted);line-height:1.4}
+.result-use{margin-left:auto;flex-shrink:0;padding:5px 10px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:6px;color:var(--accent);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+/* Rota */
+.rota-wrap{display:flex;flex-direction:column;gap:10px;padding:8px 0}
+.rota-input-wrap{position:relative}
+.rota-dot{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%}
+.rota-dot.start{background:var(--accent)}.rota-dot.end{background:var(--accent3)}
+.rota-input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:12px 12px 12px 32px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.rota-input:focus{border-color:var(--accent)}
+.rota-input::placeholder{color:var(--muted)}
+.rota-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:#000;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer}
+.rota-info{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:14px;display:none;margin-top:8px}
+.rota-info.show{display:block}
+.rota-stats{display:flex;justify-content:space-around;margin-bottom:10px}
+.rota-stat{text-align:center}
+.rota-stat-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent)}
+.rota-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.rota-clear{width:100%;padding:9px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:8px;color:#f87171;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px}
+.nav-start-big{width:100%;padding:13px;background:linear-gradient(135deg,#34d399,#818cf8);border:none;border-radius:12px;color:#000;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:8px;display:none}
+.nav-start-big.show{display:block}
+/* Navigasyon */
+.nav-wrap{display:flex;flex-direction:column;gap:10px;padding:8px 0}
+.nav-dir-card{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.25);border-radius:14px;padding:16px;text-align:center;display:none}
+.nav-dir-card.show{display:block}
+.nav-arrow{font-size:44px;margin-bottom:6px}
+.nav-dir-text{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:3px}
+.nav-dir-dist{font-size:12px;color:var(--muted)}
+.nav-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.nav-stat{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.nav-stat-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent)}
+.nav-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.nav-btn{width:100%;padding:13px;background:linear-gradient(135deg,#34d399,#818cf8);border:none;border-radius:12px;color:#000;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer}
+.nav-stop{width:100%;padding:11px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:10px;color:#f87171;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:none}
+.nav-stop.show{display:block}
+/* Bildirim */
+.report-wrap{display:flex;flex-direction:column;gap:10px;padding:8px 0}
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.report-type{padding:14px 8px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13px;cursor:pointer;text-align:center;transition:all .2s}
+.report-type:hover,.report-type.selected{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:var(--accent3)}
+.report-send{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent3),#ef4444);border:none;border-radius:12px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer}
+.report-loc{font-size:11px;color:var(--muted);text-align:center;padding:6px 0}
+/* Harita stil butonlari */
+.map-style-btns{position:fixed;left:16px;bottom:100px;z-index:400;display:flex;flex-direction:column;gap:6px}
+.msb{width:40px;height:40px;border-radius:12px;background:rgba(12,15,30,.9);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(20px);transition:all .2s}
+.msb.active,.msb:hover{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.3);color:var(--accent)}
+.traffic-legend{position:fixed;left:64px;bottom:148px;z-index:400;background:rgba(12,15,30,.9);border:1px solid var(--border);border-radius:10px;padding:8px 10px;font-size:11px;backdrop-filter:blur(20px);display:none}
+.tl-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.tl-row:last-child{margin-bottom:0}
+.tl-dot{width:8px;height:8px;border-radius:50%}
+/* Place card */
+.place-card{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:400;background:rgba(12,15,30,.95);border:1px solid var(--border);border-radius:16px;padding:14px 18px;min-width:260px;max-width:calc(100vw - 32px);backdrop-filter:blur(20px);display:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.place-card.show{display:block}
+.place-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px}
+.place-coords{font-size:11px;color:var(--muted);font-family:monospace;margin-bottom:10px}
+.place-btns{display:flex;gap:6px}
+.place-btn{flex:1;padding:8px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:8px;color:var(--accent);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center}
+.place-btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;border:none;font-weight:700}
+/* Warning */
+.warning-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(10px)}
+.warning-box{background:var(--s1);border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:28px;max-width:360px;width:90%;text-align:center}
+.warning-ok{width:100%;padding:13px;background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;border-radius:10px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer}
+/* Toast */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;opacity:0;z-index:9998;transition:all .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--accent);color:var(--accent)}
+/* Akilli Durak Sheet */
+.durak-sheet{position:fixed;bottom:0;left:0;right:0;z-index:700;background:rgba(8,10,22,.99);border-radius:20px 20px 0 0;border-top:1px solid rgba(52,211,153,.2);backdrop-filter:blur(30px);transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);max-height:72vh;display:flex;flex-direction:column}
+.durak-sheet.open{transform:translateY(0)}
+.ds-handle{width:40px;height:4px;border-radius:2px;background:var(--muted);margin:12px auto 0;flex-shrink:0}
+.ds-header{padding:12px 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.ds-badge{background:linear-gradient(135deg,#34d399,#818cf8);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.ds-title{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;line-height:1.2;flex:1}
+.ds-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.ds-close{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ds-body{overflow-y:auto;padding:8px 16px 32px;flex:1}
+/* Bus cards */
+.bus-card{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.bus-card:last-child{border-bottom:none}
+.bus-no{min-width:50px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;flex-shrink:0}
+.bus-dest{flex:1;min-width:0;font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bus-eta-wrap{flex-shrink:0;text-align:right;min-width:56px}
+.bus-eta{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;line-height:1}
+.bus-eta.soon{color:#34d399}.bus-eta.medium{color:#f59e0b}.bus-eta.later{color:var(--muted)}
+.bus-eta-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+.ds-loading{text-align:center;padding:28px;color:var(--muted);font-size:13px}
+.ds-error{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.2);border-radius:10px;padding:14px;text-align:center;color:#f87171;font-size:12px;margin:8px 0}
+.ds-empty{text-align:center;padding:28px 0;color:var(--muted);font-size:13px}
+.ds-refresh{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:7px 12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);border-radius:8px;color:var(--accent);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.ds-meta{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<a href="highly-dashboard.html" class="top-left">
+  <div class="logo-badge">
+    <div class="logo-icon">H</div>
+    <span class="logo-text">Harita</span>
+  </div>
+</a>
+
+<div class="top-right">
+  <a href="highly-dashboard.html" class="back-btn">&#8592; Dashboard</a>
+  <a href="highly-profil.html" class="avatar-btn" id="avatarBtn">?</a>
+</div>
+
+<div class="search-bar">
+  <div class="search-wrap">
+    <input class="search-input" id="searchInput" type="text" placeholder="Konum, adres, yer ara..."/>
+    <button class="loc-btn" onclick="geoLocate()" title="Konumumu bul">&#128205;</button>
+    <button class="search-go" onclick="doSearch()">&#8593;</button>
+  </div>
+</div>
+
+<div class="map-style-btns">
+  <button class="msb active" onclick="setStyle('street',this)" title="Sokak">&#128506;</button>
+  <button class="msb" onclick="setStyle('satellite',this)" title="Uydu">&#128752;</button>
+  <button class="msb" onclick="setStyle('topo',this)" title="Topo">&#9968;</button>
+  <button class="msb" id="btn3d" onclick="toggle3D(this)" title="3D Binalar">&#127970;</button>
+  <button class="msb" id="btnTraffik" onclick="toggleTraffic(this)" title="Trafik">&#128663;</button>
+</div>
+
+<div class="traffic-legend" id="trafficLegend">
+  <div style="font-size:10px;color:#6b7280;margin-bottom:5px;font-weight:700;letter-spacing:1px">TRAFIK</div>
+  <div class="tl-row"><div class="tl-dot" style="background:#34d399"></div><span style="color:#9ca3af">Akici</span></div>
+  <div class="tl-row"><div class="tl-dot" style="background:#f59e0b"></div><span style="color:#9ca3af">Orta</span></div>
+  <div class="tl-row"><div class="tl-dot" style="background:#ef4444"></div><span style="color:#9ca3af">Yogun</span></div>
+</div>
+
+<div class="place-card" id="placeCard">
+  <div class="place-name" id="placeName">&#8212;</div>
+  <div class="place-coords" id="placeCoords">&#8212;</div>
+  <div class="place-btns">
+    <button class="place-btn" onclick="copyCoords()">&#128203; Kopyala</button>
+    <button class="place-btn primary" onclick="useAsStart()">&#9654; Baslangic</button>
+    <button class="place-btn primary" style="background:linear-gradient(135deg,#f59e0b,#ef4444)" onclick="useAsEnd()">&#9209; Varis</button>
+  </div>
+</div>
+
+<!-- Ana bottom sheet -->
+<div class="bottom-sheet" id="bottomSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-peek" onclick="toggleSheet()">
+    <span class="sheet-peek-title" id="sheetTitle">Highly Harita</span>
+    <span class="sheet-peek-hint" id="sheetHint">Yukari kaydir &#8593;</span>
+  </div>
+  <div class="bottom-nav">
+    <button class="bnav-btn active" onclick="switchPanel('ara')">&#128269; Ara</button>
+    <button class="bnav-btn" onclick="switchPanel('rota')">&#129517; Rota</button>
+    <button class="bnav-btn" onclick="switchPanel('nav')">&#128205; Navigasyon</button>
+    <button class="bnav-btn" onclick="switchPanel('bildirim')">&#9888; Bildir</button>
+  </div>
+  <div class="sheet-content">
+    <!-- Arama -->
+    <div class="panel show" id="panel-ara">
+      <div id="searchResults" style="padding-top:8px">
+        <div style="text-align:center;padding:30px 0;color:var(--muted);font-size:13px">&#128506;&#65039; Aramak icin yukardaki cubugu kullan</div>
+      </div>
+    </div>
+    <!-- Rota -->
+    <div class="panel" id="panel-rota">
+      <div class="rota-wrap">
+        <div class="rota-input-wrap">
+          <div class="rota-dot start"></div>
+          <input class="rota-input" id="rotaStart" type="text" placeholder="Baslangic noktasi..."/>
+        </div>
+        <div style="width:1px;height:12px;background:var(--border);margin-left:16px"></div>
+        <div class="rota-input-wrap">
+          <div class="rota-dot end"></div>
+          <input class="rota-input" id="rotaEnd" type="text" placeholder="Varis noktasi..."/>
+        </div>
+        <button class="rota-btn" onclick="calculateRoute()">&#129517; Rota Hesapla</button>
+        <div class="rota-info" id="rotaInfo">
+          <div class="rota-stats">
+            <div class="rota-stat"><div class="rota-stat-val" id="rotaDist">&#8212;</div><div class="rota-stat-lbl">Mesafe</div></div>
+            <div class="rota-stat"><div class="rota-stat-val" id="rotaTime">&#8212;</div><div class="rota-stat-lbl">Sure</div></div>
+          </div>
+          <button class="nav-start-big show" onclick="switchPanel('nav')">&#128640; Navigasyonu Baslat</button>
+          <button class="rota-clear" onclick="clearRoute()">&#10005; Rotayi Temizle</button>
+        </div>
+      </div>
+    </div>
+    <!-- Navigasyon -->
+    <div class="panel" id="panel-nav">
+      <div class="nav-wrap">
+        <div class="nav-dir-card" id="navDirection">
+          <div class="nav-arrow" id="navArrow">&#11014;&#65039;</div>
+          <div class="nav-dir-text" id="navDirText">Duz devam et</div>
+          <div class="nav-dir-dist" id="navDirDist">&#8212;</div>
+        </div>
+        <div class="nav-stats">
+          <div class="nav-stat"><div class="nav-stat-val" id="navSpeed">0</div><div class="nav-stat-lbl">km/s</div></div>
+          <div class="nav-stat"><div class="nav-stat-val" id="navDist">&#8212;</div><div class="nav-stat-lbl">Kalan</div></div>
+          <div class="nav-stat"><div class="nav-stat-val" id="navEta">&#8212;</div><div class="nav-stat-lbl">Tahmini</div></div>
+        </div>
+        <div id="navStatus" style="text-align:center;padding:16px;color:var(--muted);font-size:13px">&#128205; Once rota olustur, sonra navigasyonu baslat</div>
+        <button class="nav-btn" id="navStartBtn" onclick="startNavigation()">&#128640; Navigasyonu Baslat</button>
+        <button class="nav-stop" id="navStopBtn" onclick="stopNavigation()" style="display:none">&#9209; Durdur</button>
+      </div>
+    </div>
+    <!-- Bildirim -->
+    <div class="panel" id="panel-bildirim">
+      <div class="report-wrap">
+        <div class="report-loc" id="reportLocInfo">&#128205; Konum aliniyor...</div>
+        <div class="report-grid">
+          <div class="report-type" onclick="selectReport(this,'kaza')">&#128680;<br>Kaza</div>
+          <div class="report-type" onclick="selectReport(this,'polis')">&#128110;<br>Polis/Radar</div>
+          <div class="report-type" onclick="selectReport(this,'bozuk')">&#128371;<br>Bozuk Yol</div>
+          <div class="report-type" onclick="selectReport(this,'calisma')">&#128679;<br>Yol Calismasi</div>
+          <div class="report-type" onclick="selectReport(this,'trafik')">&#128663;<br>Yogun Trafik</div>
+          <div class="report-type" onclick="selectReport(this,'diger')">&#10067;<br>Diger</div>
+        </div>
+        <button class="report-send" onclick="submitReport()">&#9888;&#65039; Bildir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Akilli Durak Sheet (z-index daha yuksek, ana sheeti kaplar) -->
+<div class="durak-sheet" id="durakSheet">
+  <div class="ds-handle"></div>
+  <div class="ds-header">
+    <div style="flex:1;min-width:0">
+      <div class="ds-title" id="dsTitle">Durak</div>
+      <div class="ds-sub" id="dsSub">Yukleniyor...</div>
+    </div>
+    <div class="ds-badge">&#128652; Akilli Durak</div>
+    <button class="ds-close" onclick="closeDurak()">&#10005;</button>
+  </div>
+  <div class="ds-body" id="dsBody">
+    <div class="ds-loading">&#128652; Otobus bilgileri yukleniyor...</div>
+  </div>
+</div>
+
+<!-- Uyari -->
+<div class="warning-modal" id="warningModal">
+  <div class="warning-box">
+    <div style="font-size:44px;margin-bottom:14px">&#9888;&#65039;</div>
+    <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;margin-bottom:10px;color:#f59e0b">Guvenli Surus</div>
+    <div style="font-size:13px;color:#9ca3af;line-height:1.7;margin-bottom:22px">
+      <strong style="color:#e8f0ff">Lutfen dikkatli olun!</strong><br><br>
+      Haritada <strong style="color:#34d399">105 akilli durak</strong> isareti var.<br>
+      Duraga tikla, siradaki otobüsleri gor.<br>
+      &#128663; Surus sirasinda telefona bakmayin
+    </div>
+    <button class="warning-ok" onclick="closeWarning()">Anladim, Devam Et &#8594;</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function closeWarning() { document.getElementById('warningModal').style.display = 'none'; sessionStorage.setItem('warningShown','1'); }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
+<script>
+const SMART_STOPS = [{"id": "10130", "name": "BAŞİSKELE DURAĞI 1", "ilce": "BAŞİSKELE", "lat": 40.7150585, "lon": 29.9316066}, {"id": "10321", "name": "YUVACIK SAPAĞI 1", "ilce": "BAŞİSKELE", "lat": 40.7230431, "lon": 29.9503592}, {"id": "10867", "name": "DERİNCE 44 EVLER 3", "ilce": "DERİNCE", "lat": 40.756579, "lon": 29.819012}, {"id": "11290", "name": "ECE SOKAK", "ilce": "İZMİT", "lat": 40.786217, "lon": 29.97078}, {"id": "20074", "name": "BEŞ YOL 212. SOKAK 1", "ilce": "ÇAYIROVA", "lat": 40.8278675, "lon": 29.3821959}, {"id": "20202", "name": "ÇAYIROVA KÖPRÜSÜ", "ilce": "ÇAYIROVA", "lat": 40.8124455, "lon": 29.3687922}, {"id": "20219", "name": "YENİ MAHALLE PASTANE", "ilce": "ÇAYIROVA", "lat": 40.824005, "lon": 29.371973}, {"id": "20227", "name": "MESCİD-İ AKSA CAMİ", "ilce": "ÇAYIROVA", "lat": 40.829559, "lon": 29.3781423}, {"id": "20246", "name": "ÇAYIROVA KAYMAKAMLIK", "ilce": "ÇAYIROVA", "lat": 40.8590028, "lon": 29.3905569}, {"id": "30027", "name": "FARABİ DEVLET HASTANESİ", "ilce": "DARICA", "lat": 40.7726605, "lon": 29.407849}, {"id": "30028", "name": "FARABİ DEVLET HASTANESİ ACİL GİRİŞİ 1", "ilce": "DARICA", "lat": 40.7714824, "lon": 29.4042946}, {"id": "30029", "name": "FARABİ DEVLET HASTANESİ ACİL GİRİŞİ", "ilce": "DARICA", "lat": 40.7716437, "lon": 29.4054842}, {"id": "30052", "name": "ADNAN MENDERES KÜLTÜR MERKEZİ", "ilce": "DARICA", "lat": 40.7774496, "lon": 29.4049954}, {"id": "30063", "name": "İSTASYON KÖPRÜSÜ 1", "ilce": "DARICA", "lat": 40.7820346, "lon": 29.4112913}, {"id": "30078", "name": "CUMHURIYET MEYDANI", "ilce": "DARICA", "lat": 40.7624324, "lon": 29.3893493}, {"id": "30084", "name": "DARICA ZİRAAT BANKASI 1", "ilce": "DARICA", "lat": 40.7587924, "lon": 29.3837451}, {"id": "30207", "name": "ŞEHİT PİYADE ER MURAT ALTAY PARKI 1", "ilce": "DARICA", "lat": 40.791057, "lon": 29.373814}, {"id": "30346", "name": "NENEHATUN MUHTARLIĞI", "ilce": "DARICA", "lat": 40.7813167, "lon": 29.3849689}, {"id": "30388", "name": "MARMARAY TREN İSTASYONU 1", "ilce": "DARICA", "lat": 40.7833328, "lon": 29.4109904}, {"id": "40112", "name": "DERİNCE GEÇİT 1", "ilce": "DERİNCE", "lat": 40.756304, "lon": 29.830306}, {"id": "40117", "name": "DERİNCE 44 EVLER", "ilce": "DERİNCE", "lat": 40.756715, "lon": 29.816157}, {"id": "40128", "name": "DERİNCE GEÇİT 2", "ilce": "DERİNCE", "lat": 40.7558356, "lon": 29.8304408}, {"id": "40214", "name": "DERİNCE MERKEZ", "ilce": "DERİNCE", "lat": 40.7574424, "lon": 29.8310799}, {"id": "41712", "name": "AKÇAKOCABEY", "ilce": "İZMİT", "lat": 40.762643, "lon": 29.958411}, {"id": "41760", "name": "GEBZE CENTER AVM", "ilce": "GEBZE", "lat": 40.796844, "lon": 29.442766}, {"id": "41945", "name": "TATLIKUYU KÖPRÜSÜ", "ilce": "GEBZE", "lat": 40.7947013, "lon": 29.4326596}, {"id": "50030", "name": "DİLOVASI BELEDİYESİ 3", "ilce": "DİLOVASI", "lat": 40.7855268, "lon": 29.5411492}, {"id": "50053", "name": "ŞEHİT SEBAHATTİN DÜNDAR ÇEŞMESİ 2", "ilce": "DİLOVASI", "lat": 40.787804, "lon": 29.53373}, {"id": "50067", "name": "DİLİSKELESİ MEYDAN 1", "ilce": "DİLOVASI", "lat": 40.778965, "lon": 29.523218}, {"id": "60205", "name": "FATİH İMAM HATİP ORTAOKULU 1", "ilce": "GEBZE", "lat": 40.8039793, "lon": 29.3905587}, {"id": "60257", "name": "AHMET PENBEGÜLLÜ KÜLTÜR MERKEZİ", "ilce": "GEBZE", "lat": 40.798933, "lon": 29.4011694}, {"id": "60298", "name": "İBRAHİMAĞA CADDESİ 1", "ilce": "GEBZE", "lat": 40.8012833, "lon": 29.43149}, {"id": "60371", "name": "MEVLANA KAPALI PAZAR", "ilce": "GEBZE", "lat": 40.8124791, "lon": 29.4197741}, {"id": "60372", "name": "MEVLANA KAPALI PAZAR 1", "ilce": "GEBZE", "lat": 40.8124504, "lon": 29.4203132}, {"id": "60401", "name": "AK ÇARŞI", "ilce": "GEBZE", "lat": 40.7995321, "lon": 29.4303017}, {"id": "60403", "name": "MUSTAFA PAŞA CAMİ", "ilce": "GEBZE", "lat": 40.7989143, "lon": 29.4291871}, {"id": "60408", "name": "İSMETPAŞA CADDESİ", "ilce": "GEBZE", "lat": 40.7966663, "lon": 29.43303}, {"id": "60431", "name": "FATİH SULTAN MEHMET AKADEMİ LİSE", "ilce": "GEBZE", "lat": 40.795072, "lon": 29.4231906}, {"id": "60471", "name": "İSTASYON CADDESİ", "ilce": "GEBZE", "lat": 40.7899739, "lon": 29.4216289}, {"id": "60542", "name": "MUSTAFA ÜSTÜNDAĞ ORTAOKULU 1", "ilce": "GEBZE", "lat": 40.8287821, "lon": 29.4184993}, {"id": "60794", "name": "GEBZE CENTER KÖPRÜSÜ", "ilce": "GEBZE", "lat": 40.797601, "lon": 29.442667}, {"id": "60813", "name": "2744. SOKAK 1", "ilce": "GEBZE", "lat": 40.8241145, "lon": 29.464813}, {"id": "60863", "name": "EMLAK KONUT", "ilce": "GEBZE", "lat": 40.8261482, "lon": 29.4773381}, {"id": "70163", "name": "DONANMA 1", "ilce": "GÖLCÜK", "lat": 40.716904, "lon": 29.815998}, {"id": "70164", "name": "PERVANE 1", "ilce": "GÖLCÜK", "lat": 40.71674, "lon": 29.819054}, {"id": "70167", "name": "GÖLCÜK ESKİ GARAJLAR", "ilce": "GÖLCÜK", "lat": 40.7165701, "lon": 29.8235598}, {"id": "70168", "name": "DUMLUPINAR İSKELE YOLU 1", "ilce": "GÖLCÜK", "lat": 40.7154133, "lon": 29.8303136}, {"id": "70212", "name": "HALIDERE MERKEZ", "ilce": "GÖLCÜK", "lat": 40.7161249, "lon": 29.7530231}, {"id": "70264", "name": "DEĞİRMENDERE MERKEZ", "ilce": "GÖLCÜK", "lat": 40.7211178, "lon": 29.7824844}, {"id": "70279", "name": "GÖLCÜK NECATİ ÇELİK DEVLET HASTANESİ 1", "ilce": "GÖLCÜK", "lat": 40.7180181, "lon": 29.7937111}, {"id": "70420", "name": "GÖLCÜK PERVANE", "ilce": "GÖLCÜK", "lat": 40.716846, "lon": 29.818645}, {"id": "80025", "name": "EREN CAMİ", "ilce": "İZMİT", "lat": 40.7649733, "lon": 29.9388706}, {"id": "80037", "name": "İZMİT TREN İSTASYONU", "ilce": "İZMİT", "lat": 40.7622069, "lon": 29.9189969}, {"id": "80041", "name": "İZMİT LİSESİ", "ilce": "İZMİT", "lat": 40.7659098, "lon": 29.9274027}, {"id": "80045", "name": "ÇINARLI CAMİ", "ilce": "İZMİT", "lat": 40.766723, "lon": 29.9331675}, {"id": "80048", "name": "KOCAELİ DEVLET HASTANESİ", "ilce": "İZMİT", "lat": 40.767813, "lon": 29.937741}, {"id": "80049", "name": "MİMAR SİNAN ANADOLU LİSESİ", "ilce": "İZMİT", "lat": 40.768364, "lon": 29.9394802}, {"id": "80057", "name": "ZİNCİRLİKUYU CAMİ", "ilce": "İZMİT", "lat": 40.7716551, "lon": 29.9493929}, {"id": "80066", "name": "KÜTÜPHANE", "ilce": "İZMİT", "lat": 40.765627, "lon": 29.9344691}, {"id": "80078", "name": "KURUÇEŞME MERKEZ", "ilce": "İZMİT", "lat": 40.765381, "lon": 29.877556}, {"id": "80129", "name": "ŞİRİNTEPE ÜST GEÇİT 1", "ilce": "İZMİT", "lat": 40.7615205, "lon": 29.8607742}, {"id": "80164", "name": "İZMİT LİSESİ D 100", "ilce": "İZMİT", "lat": 40.763842, "lon": 29.8909683}, {"id": "80335", "name": "EMNİYET ASAYİŞ ŞUBE MÜDÜRLÜĞÜ", "ilce": "İZMİT", "lat": 40.7622214, "lon": 29.9363463}, {"id": "80336", "name": "ESNAF KEFALET", "ilce": "İZMİT", "lat": 40.7618336, "lon": 29.9301768}, {"id": "80337", "name": "FEVZİYE KUZEY YAN YOL 1", "ilce": "İZMİT", "lat": 40.7617012, "lon": 29.9234567}, {"id": "80338", "name": "FEVZİYE KUZEY YAN YOL", "ilce": "İZMİT", "lat": 40.7615325, "lon": 29.9238063}, {"id": "80340", "name": "TURGUT ÖZAL KÖPRÜSÜ D 100", "ilce": "İZMİT", "lat": 40.7619649, "lon": 29.9360791}, {"id": "80341", "name": "KOCAELİ VALİLİĞİ", "ilce": "İZMİT", "lat": 40.7627881, "lon": 29.9462155}, {"id": "80344", "name": "ADNAN MENDERES D 100 1", "ilce": "İZMİT", "lat": 40.761513, "lon": 29.926487}, {"id": "80346", "name": "DOSTLUK SİTESİ", "ilce": "İZMİT", "lat": 40.7665109, "lon": 29.907493}, {"id": "80347", "name": "YENİDOĞAN D 100", "ilce": "İZMİT", "lat": 40.7670528, "lon": 29.9031065}, {"id": "80348", "name": "SEKA DEVLET HASTANESİ D 100", "ilce": "İZMİT", "lat": 40.7657031, "lon": 29.8983139}, {"id": "80351", "name": "KURUÇEŞME IŞIKLAR", "ilce": "İZMİT", "lat": 40.764091, "lon": 29.875057}, {"id": "80352", "name": "SGK İL MÜDÜRLÜĞÜ D 100", "ilce": "İZMİT", "lat": 40.7629814, "lon": 29.8777459}, {"id": "80353", "name": "EĞİTİM KAMPÜSÜ 1", "ilce": "İZMİT", "lat": 40.7637439, "lon": 29.8917603}, {"id": "80356", "name": "SEKA DEVLET HASTANESİ D 100 1", "ilce": "İZMİT", "lat": 40.766273, "lon": 29.900068}, {"id": "80357", "name": "YENİDOĞAN D 100 1", "ilce": "İZMİT", "lat": 40.7665931, "lon": 29.904174}, {"id": "80359", "name": "SEKA", "ilce": "İZMİT", "lat": 40.7651704, "lon": 29.9112439}, {"id": "80361", "name": "YENİ CUMA DOĞU", "ilce": "İZMİT", "lat": 40.761527, "lon": 29.9322986}, {"id": "80362", "name": "ADNAN MENDERES D 100", "ilce": "İZMİT", "lat": 40.7612467, "lon": 29.9257697}, {"id": "80363", "name": "VALİLİK D 100", "ilce": "İZMİT", "lat": 40.762277, "lon": 29.945608}, {"id": "80370", "name": "ADNAN MENDERES GÜNEY YANYOL", "ilce": "İZMİT", "lat": 40.760838, "lon": 29.924423}, {"id": "80371", "name": "MİMAR SİNAN GÜNEY YANYOL", "ilce": "İZMİT", "lat": 40.760964, "lon": 29.931273}, {"id": "80372", "name": "İZMİT MİLLET BAHÇESİ", "ilce": "İZMİT", "lat": 40.7612428, "lon": 29.9374157}, {"id": "80374", "name": "SADIK AHMET ÜST GEÇİDİ 1", "ilce": "İZMİT", "lat": 40.755127, "lon": 29.94712}, {"id": "80388", "name": "SADIK AHMET ÜST GEÇİDİ", "ilce": "İZMİT", "lat": 40.756036, "lon": 29.946358}, {"id": "80398", "name": "LEYLA ATAKAN CADDESİ", "ilce": "İZMİT", "lat": 40.763547, "lon": 29.9348}, {"id": "80525", "name": "KANDIRA SAPAĞI 1", "ilce": "İZMİT", "lat": 40.7623359, "lon": 29.9551792}, {"id": "80528", "name": "YAHYA KAPTAN GÜNEY YANYOL", "ilce": "İZMİT", "lat": 40.7600823, "lon": 29.9756581}, {"id": "80572", "name": "YAHYA KAPTAN 5", "ilce": "İZMİT", "lat": 40.763363, "lon": 29.971843}, {"id": "80624", "name": "İZMİT OTOGAR 2", "ilce": "İZMİT", "lat": 40.775292, "lon": 29.972487}, {"id": "80651", "name": "BAYINDIRLIK İŞ MERKEZİ", "ilce": "İZMİT", "lat": 40.801357, "lon": 29.974152}, {"id": "80868", "name": "SEKA CAMİ", "ilce": "İZMİT", "lat": 40.763582, "lon": 29.913451}, {"id": "90028", "name": "AKÇAKOCA İLKOKULU", "ilce": "KANDIRA", "lat": 41.068511, "lon": 30.153206}, {"id": "94164", "name": "KARAMÜRSEL İMAM HATİP ORTAOKULU", "ilce": "KARAMÜRSEL", "lat": 40.691974, "lon": 29.618831}, {"id": "96275", "name": "KARTEPE İSTASYON 1", "ilce": "KARTEPE", "lat": 40.75326, "lon": 30.022679}, {"id": "96285", "name": "ÇELİK HALAT ÜST GEÇİDİ", "ilce": "KARTEPE", "lat": 40.7507906, "lon": 30.0426209}, {"id": "96577", "name": "KARTEPE İSTASYON", "ilce": "KARTEPE", "lat": 40.753704, "lon": 30.022463}, {"id": "98025", "name": "TÜTÜNÇİFTLİK MERKEZ 3", "ilce": "KÖRFEZ", "lat": 40.760823, "lon": 29.787205}, {"id": "98027", "name": "95 EVLER", "ilce": "KÖRFEZ", "lat": 40.75826, "lon": 29.7944693}, {"id": "98028", "name": "KÖRFEZ KAYMAKAMLIK", "ilce": "KÖRFEZ", "lat": 40.7696996, "lon": 29.7647399}, {"id": "98036", "name": "TÜTÜNÇİFTLİK MERKEZ", "ilce": "KÖRFEZ", "lat": 40.762181, "lon": 29.785038}, {"id": "98039", "name": "KÖRFEZ DIŞ HASTANESİ 1", "ilce": "KÖRFEZ", "lat": 40.7660788, "lon": 29.7752532}, {"id": "98278", "name": "KÖRFEZ DİŞ HASTANESİ", "ilce": "KÖRFEZ", "lat": 40.765653, "lon": 29.775072}, {"id": "98293", "name": "KÖRFEZ BELEDİYESİ", "ilce": "KÖRFEZ", "lat": 40.7734687, "lon": 29.7442871}];
+const API_BASE = 'https://veri.kocaeli.bel.tr';
+const API_EKRAN = '/api/OpenData/c7b7c933-7913-4483-937d-4760f7e5e29b';
+const API_DURAK = '/api/OpenData/a9604fe2-c723-41fd-bf74-6cea8af16a54';
+
+// Kullanici
+const saved = localStorage.getItem('highly_user');
+if (!saved) location.href = 'highly-id.html';
+const user = JSON.parse(saved || '{"name":"?"}');
+const av = document.getElementById('avatarBtn');
+if (user.avatarEmoji) { av.textContent = user.avatarEmoji; av.style.background = 'transparent'; av.style.fontSize = '22px'; }
+else { av.textContent = (user.name||'?')[0].toUpperCase(); if (user.avatarBg) av.style.background = user.avatarBg; }
+
+// Uyari
+if (sessionStorage.getItem('warningShown')) document.getElementById('warningModal').style.display = 'none';
+
+// Harita - Kocaeli merkezi
+const map = L.map('map', { zoomControl:true }).setView([40.765, 29.94], 13);
+const tiles = {
+  street:    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OSM', maxZoom:19 }),
+  satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution:'© Esri', maxZoom:19 }),
+  topo:      L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution:'© OTM', maxZoom:17 })
+};
+tiles.street.addTo(map);
+let currentTile = 'street';
+
+function setStyle(style, btn) {
+  map.removeLayer(tiles[currentTile]);
+  tiles[style].addTo(map);
+  currentTile = style;
+  document.querySelectorAll('.msb').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Markerlar
+const mkIcon = (color, shadow) => L.divIcon({ className:'', html:`<div style="width:26px;height:26px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 4px 12px ${shadow}"></div>`, iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-30] });
+const startIcon = mkIcon('linear-gradient(135deg,#34d399,#818cf8)', 'rgba(52,211,153,.5)');
+const endIcon   = mkIcon('linear-gradient(135deg,#f59e0b,#ef4444)', 'rgba(245,158,11,.5)');
+const pinIcon   = mkIcon('linear-gradient(135deg,#34d399,#818cf8)', 'rgba(52,211,153,.5)');
+
+// Akilli durak ikonu
+const smartStopIcon = L.divIcon({
+  className:'',
+  html:'<div style="width:14px;height:14px;background:linear-gradient(135deg,#34d399,#818cf8);border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 8px rgba(52,211,153,.7)"></div>',
+  iconSize:[14,14], iconAnchor:[7,7]
+});
+const smartStopIconActive = L.divIcon({
+  className:'',
+  html:'<div style="width:20px;height:20px;background:linear-gradient(135deg,#34d399,#818cf8);border-radius:50%;border:3px solid #fff;box-shadow:0 0 16px rgba(52,211,153,.95)"></div>',
+  iconSize:[20,20], iconAnchor:[10,10]
+});
+
+// Akilli duraklari haritaya ekle
+let activeStopMarker = null;
+SMART_STOPS.forEach(stop => {
+  const m = L.marker([stop.lat, stop.lon], { icon: smartStopIcon }).addTo(map);
+  m.on('click', e => {
+    L.DomEvent.stopPropagation(e);
+    openDurak(stop, m);
+  });
+});
+
+// --- Akilli Durak Sheet ---
+let currentDurakId = null;
+
+function openDurak(stop, marker) {
+  if (activeStopMarker) activeStopMarker.setIcon(smartStopIcon);
+  activeStopMarker = marker;
+  marker.setIcon(smartStopIconActive);
+  currentDurakId = stop.id;
+  document.getElementById('dsTitle').textContent = stop.name;
+  document.getElementById('dsSub').textContent = stop.ilce + ' — Durak #' + stop.id;
+  document.getElementById('dsBody').innerHTML = '<div class="ds-loading">&#128652; Otobus bilgileri yukleniyor...</div>';
+  document.getElementById('durakSheet').classList.add('open');
+  map.panTo([stop.lat, stop.lon]);
+  fetchDurakBuses(stop.id);
+}
+
+function closeDurak() {
+  document.getElementById('durakSheet').classList.remove('open');
+  if (activeStopMarker) { activeStopMarker.setIcon(smartStopIcon); activeStopMarker = null; }
+  currentDurakId = null;
+}
+
+async function fetchDurakBuses(stopId) {
+  const body = document.getElementById('dsBody');
+  try {
+    const res = await fetch(API_BASE + API_EKRAN + '?DurakId=' + stopId, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    renderDurakBuses(body, data, stopId);
+  } catch(err) {
+    // fallback: diger endpoint
+    try {
+      const res2 = await fetch(API_BASE + API_DURAK + '?DurakId=' + stopId, {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!res2.ok) throw new Error('HTTP ' + res2.status);
+      const data2 = await res2.json();
+      renderDurakBuses(body, data2, stopId);
+    } catch(err2) {
+      body.innerHTML = '<div class="ds-error">' +
+        '<div style="font-size:22px;margin-bottom:6px">&#128531;</div>' +
+        '<div>API\'ye baglanilamadi</div>' +
+        '<div style="margin-top:4px;font-size:11px;color:#9ca3af">' + err2.message + '</div>' +
+        '<button class="ds-refresh" onclick="fetchDurakBuses(&#39;' + stopId + '&#39;)">&#8635; Tekrar Dene</button>' +
+        '</div>';
+    }
+  }
+}
+
+function timeToMins(str) {
+  if (!str) return null;
+  const s = String(str).trim().substring(0, 5);
+  const p = s.split(':');
+  if (p.length < 2) return null;
+  const h = parseInt(p[0]), m = parseInt(p[1]);
+  if (isNaN(h)||isNaN(m)) return null;
+  return h*60+m;
+}
+function minsToHHMM(tm) {
+  const h = Math.floor((tm%1440)/60), m = tm%60;
+  return h.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0');
+}
+
+function renderDurakBuses(body, data, stopId) {
+  let buses = Array.isArray(data) ? data
+    : (data.value||data.data||data.result||data.Data||[]);
+
+  if (!buses.length) {
+    body.innerHTML = '<div class="ds-empty"><div style="font-size:28px;margin-bottom:8px">&#128683;</div>' +
+      '<div>Sirada bekleyen otobus yok</div>' +
+      '<div style="font-size:11px;margin-top:4px">ya da bu durak aktif degil</div>' +
+      '<button class="ds-refresh" onclick="fetchDurakBuses(&#39;' + stopId + '&#39;)">&#8635; Yenile</button></div>';
+    return;
+  }
+
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes();
+
+  const items = buses.slice(0,12).map(b => {
+    const lineNo  = b.HatNo||b.hatNo||b.LineNo||b.line||b.Hat||'?';
+    const dest    = b.GuzergahAdi||b.guzergahAdi||b.Hedef||b.hedef||b.Destination||b.TripHeadsign||'';
+    const arrStr  = b.TahminiVaris||b.tahminiVaris||b.ArrivalTime||b.GelisSaati||b.Saat||'';
+    const minLeft = b.KalanDakika!==undefined ? b.KalanDakika : (b.kalanDakika!==undefined ? b.kalanDakika : null);
+    const colorHex= b.RouteColor||b.HatRenk||'1ea9bd';
+    const bgColor = '#' + colorHex.replace('#','');
+
+    let etaVal = '', etaLbl = '', etaCls = 'later';
+
+    if (minLeft !== null && minLeft !== undefined) {
+      const mins = parseInt(minLeft);
+      if (mins <= 60) {
+        etaVal = mins <= 1 ? '&#10004;' : mins + ' dk';
+        etaLbl = mins <= 1 ? 'geliyor' : 'sonra';
+        etaCls = mins <= 5 ? 'soon' : mins <= 20 ? 'medium' : 'later';
+      } else {
+        // 60dk ustu: saati yaz
+        etaVal = arrStr ? String(arrStr).substring(0,5) : minsToHHMM(nowMin+mins);
+        etaLbl = 'gelis saati';
+        etaCls = 'later';
+      }
+    } else if (arrStr) {
+      const arrMin = timeToMins(arrStr);
+      if (arrMin !== null) {
+        let diff = arrMin - nowMin;
+        if (diff < -120) diff += 1440;
+        if (diff < 0) diff = 0;
+        if (diff <= 60) {
+          etaVal = diff <= 1 ? '&#10004;' : diff + ' dk';
+          etaLbl = diff <= 1 ? 'geliyor' : 'sonra';
+          etaCls = diff <= 5 ? 'soon' : diff <= 20 ? 'medium' : 'later';
+        } else {
+          etaVal = String(arrStr).substring(0,5);
+          etaLbl = 'gelis saati';
+          etaCls = 'later';
+        }
+      } else {
+        etaVal = String(arrStr).substring(0,5);
+        etaLbl = 'gelis saati';
+      }
+    }
+
+    return '<div class="bus-card">' +
+      '<div class="bus-no" style="background:' + bgColor + '22;color:' + bgColor + ';border:1px solid ' + bgColor + '44">' + lineNo + '</div>' +
+      '<div class="bus-dest">' + (dest||'Guzergah bilgisi yok') + '</div>' +
+      '<div class="bus-eta-wrap">' +
+        '<div class="bus-eta ' + etaCls + '">' + etaVal + '</div>' +
+        '<div class="bus-eta-lbl">' + etaLbl + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  body.innerHTML =
+    '<div class="ds-meta"><span>' + buses.length + ' sefer bilgisi</span>' +
+    '<span>' + ts + ' &nbsp;<button onclick="fetchDurakBuses(&#39;' + stopId + '&#39;)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px">&#8635; Yenile</button></span></div>' +
+    items;
+}
+
+// --- Orijinal harita kodu ---
+let marker = null, selectedCoords = null, routingControl = null;
+
+map.on('click', e => {
+  if (currentDurakId) { closeDurak(); return; }
+  const { lat, lng } = e.latlng;
+  fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&accept-language=tr')
+    .then(r=>r.json()).then(data=>{
+      const name = data.display_name ? data.display_name.split(',')[0] : 'Secilen Konum';
+      placeMarker(lat, lng, name);
+    }).catch(()=>placeMarker(lat, lng, 'Secilen Konum'));
+});
+
+function placeMarker(lat, lon, name) {
+  if (marker) map.removeLayer(marker);
+  marker = L.marker([lat,lon],{icon:pinIcon}).addTo(map)
+    .bindPopup('<b style="font-family:Syne,sans-serif">'+name+'</b>').openPopup();
+  map.panTo([lat,lon]);
+  selectedCoords={lat,lon,name};
+  document.getElementById('placeName').textContent=name;
+  document.getElementById('placeCoords').textContent=lat.toFixed(5)+', '+lon.toFixed(5);
+  document.getElementById('placeCard').classList.add('show');
+}
+function hideCard(){document.getElementById('placeCard').classList.remove('show');}
+
+let sheetExpanded=false;
+function toggleSheet(){
+  sheetExpanded=!sheetExpanded;
+  document.getElementById('bottomSheet').classList.toggle('expanded',sheetExpanded);
+  document.getElementById('sheetHint').textContent=sheetExpanded?'Asagi kaydir':'Yukari kaydir';
+}
+const sheet=document.getElementById('bottomSheet');
+let tsy=0;
+sheet.addEventListener('touchstart',e=>{tsy=e.touches[0].clientY;},{passive:true});
+sheet.addEventListener('touchend',e=>{
+  const dy=e.changedTouches[0].clientY-tsy;
+  if(dy<-50&&!sheetExpanded){sheetExpanded=true;sheet.classList.add('expanded');document.getElementById('sheetHint').textContent='Asagi kaydir';}
+  if(dy>50&&sheetExpanded){sheetExpanded=false;sheet.classList.remove('expanded');document.getElementById('sheetHint').textContent='Yukari kaydir';}
+},{passive:true});
+
+const PANELS=['ara','rota','nav','bildirim'];
+function switchPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('show');
+  const idx=PANELS.indexOf(name);
+  if(idx>=0) document.querySelectorAll('.bnav-btn')[idx].classList.add('active');
+  const titles={ara:'Konum Ara',rota:'Rota Olustur',nav:'Navigasyon',bildirim:'Bildirim Gonder'};
+  document.getElementById('sheetTitle').textContent=titles[name]||'Highly Harita';
+  if(!sheetExpanded) toggleSheet();
+  if(name==='bildirim') getReportLocation();
+}
+
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+async function doSearch(){
+  const q=document.getElementById('searchInput').value.trim(); if(!q)return;
+  const re=document.getElementById('searchResults');
+  re.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">Araniyor...</div>';
+  switchPanel('ara');
+  try{
+    const res=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(q)+'&format=json&limit=6&accept-language=tr&addressdetails=1');
+    const data=await res.json();
+    if(!data.length){re.innerHTML='<div style="text-align:center;padding:20px;color:#f87171;font-size:13px">Sonuc bulunamadi</div>';return;}
+    re.innerHTML=data.map(r=>{
+      const dn=r.display_name.replace(/'/g,'&apos;');
+      const sn=r.display_name.split(',')[0].replace(/'/g,'&apos;');
+      const addr=r.display_name.split(',').slice(1,3).join(', ');
+      return '<div class="result-item" onclick="selectResult('+r.lat+','+r.lon+',\''+dn+'\',this)">'+
+        '<div class="result-icon">&#128205;</div>'+
+        '<div style="flex:1;min-width:0"><div class="result-name">'+r.display_name.split(',')[0]+'</div>'+
+        '<div class="result-addr">'+addr+'</div></div>'+
+        '<button class="result-use" onclick="event.stopPropagation();setAsEnd('+r.lat+','+r.lon+',\''+sn+'\')">Rota &rarr;</button>'+
+        '</div>';
+    }).join('');
+  }catch{re.innerHTML='<div style="text-align:center;padding:20px;color:#f87171;font-size:13px">Baglanti hatasi</div>';}
+}
+function selectResult(lat,lon,name,el){
+  document.querySelectorAll('.result-item').forEach(r=>r.style.background='');
+  el.style.background='rgba(52,211,153,.07)';
+  placeMarker(parseFloat(lat),parseFloat(lon),name);
+}
+function setAsEnd(lat,lon,name){
+  document.getElementById('rotaEnd').value=name;
+  document.getElementById('rotaEnd').dataset.lat=lat;
+  document.getElementById('rotaEnd').dataset.lon=lon;
+  switchPanel('rota'); showToast('Varis noktasi ayarlandi!',true);
+}
+function geoLocate(){
+  if(!navigator.geolocation)return showToast('Konum desteklenmiyor',false);
+  navigator.geolocation.getCurrentPosition(pos=>{
+    placeMarker(pos.coords.latitude,pos.coords.longitude,'Konumun');
+    map.setView([pos.coords.latitude,pos.coords.longitude],15);
+    showToast('Konumun bulundu!',true);
+  },()=>showToast('Konum alinamadi',false));
+}
+function copyCoords(){if(!selectedCoords)return;navigator.clipboard.writeText(selectedCoords.lat.toFixed(6)+', '+selectedCoords.lon.toFixed(6));showToast('Kopyalandi!',true);}
+function useAsStart(){if(!selectedCoords)return;document.getElementById('rotaStart').value=selectedCoords.name;document.getElementById('rotaStart').dataset.lat=selectedCoords.lat;document.getElementById('rotaStart').dataset.lon=selectedCoords.lon;switchPanel('rota');hideCard();showToast('Baslangic ayarlandi!',true);}
+function useAsEnd(){if(!selectedCoords)return;document.getElementById('rotaEnd').value=selectedCoords.name;document.getElementById('rotaEnd').dataset.lat=selectedCoords.lat;document.getElementById('rotaEnd').dataset.lon=selectedCoords.lon;switchPanel('rota');hideCard();showToast('Varis ayarlandi!',true);}
+
+async function calculateRoute(){
+  const sI=document.getElementById('rotaStart'),eI=document.getElementById('rotaEnd');
+  if(!sI.value.trim()||!eI.value.trim())return showToast('Baslangic ve varis gir!',false);
+  showToast('Rota hesaplaniyor...',true);
+  try{
+    let sLat=sI.dataset.lat,sLon=sI.dataset.lon;
+    if(!sLat){const r=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(sI.value)+'&format=json&limit=1&accept-language=tr');const d=await r.json();if(!d.length)return showToast('Baslangic bulunamadi!',false);sLat=d[0].lat;sLon=d[0].lon;}
+    let eLat=eI.dataset.lat,eLon=eI.dataset.lon;
+    if(!eLat){const r=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(eI.value)+'&format=json&limit=1&accept-language=tr');const d=await r.json();if(!d.length)return showToast('Varis bulunamadi!',false);eLat=d[0].lat;eLon=d[0].lon;}
+    if(routingControl)map.removeControl(routingControl);
+    if(marker){map.removeLayer(marker);marker=null;}
+    routingControl=L.Routing.control({
+      waypoints:[L.latLng(parseFloat(sLat),parseFloat(sLon)),L.latLng(parseFloat(eLat),parseFloat(eLon))],
+      createMarker:(i,wp)=>L.marker(wp.latLng,{icon:i===0?startIcon:endIcon}),
+      lineOptions:{styles:[{color:'#34d399',weight:5,opacity:.8}]},
+      router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1'}),
+      show:false,addWaypoints:false,routeWhileDragging:false
+    }).addTo(map);
+    routingControl.on('routesfound',e=>{
+      const r=e.routes[0].summary,km=(r.totalDistance/1000).toFixed(1),min=Math.round(r.totalTime/60),h=Math.floor(min/60),m=min%60;
+      document.getElementById('rotaDist').textContent=km+' km';
+      document.getElementById('rotaTime').textContent=h>0?h+'s '+m+'dk':m+' dk';
+      document.getElementById('rotaInfo').classList.add('show');
+      showToast('Rota bulundu! '+km+' km',true);
+    });
+    routingControl.on('routingerror',()=>showToast('Rota bulunamadi!',false));
+  }catch{showToast('Baglanti hatasi!',false);}
+}
+function clearRoute(){
+  if(routingControl){map.removeControl(routingControl);routingControl=null;}
+  document.getElementById('rotaInfo').classList.remove('show');
+  ['rotaStart','rotaEnd'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).dataset.lat='';document.getElementById(id).dataset.lon='';});
+  showToast('Rota temizlendi',true);
+}
+
+let navActive=false,navWatcher=null,navMarker=null,navSteps=[],navStepIdx=0,lastSpokenIdx=-1;
+function speak(t){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='tr-TR';u.rate=1;window.speechSynthesis.speak(u);}
+function calcDist(la1,lo1,la2,lo2){const R=6371000,dLat=(la2-la1)*Math.PI/180,dLon=(lo2-lo1)*Math.PI/180,a=Math.sin(dLat/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function fmtDist(m){return m>=1000?(m/1000).toFixed(1)+' km':Math.round(m)+' m';}
+function getArrow(s){if(s.type==='arrive')return '&#127937;';const m=s.modifier;if(m==='left'||m==='sharp left')return '&#11013;&#65039;';if(m==='right'||m==='sharp right')return '&#10145;&#65039;';if(m==='slight left')return '&#8598;&#65039;';if(m==='slight right')return '&#8599;&#65039;';if(m==='uturn')return '&#128260;';return '&#11014;&#65039;';}
+function getStepText(s){if(s.type==='arrive')return 'Varisa ulastin!';if(s.type==='depart')return 'Hareket et';const t={'turn':{'left':'Sola don','right':'Saga don','slight left':'Hafif sola','slight right':'Hafif saga','sharp left':'Sert sola','sharp right':'Sert saga','uturn':'Geri don'},'new name':{'straight':'Duz devam et'},'merge':{'straight':'Birles'}};return (t[s.type]&&t[s.type][s.modifier])||'Devam et';}
+function startNavigation(){
+  if(!routingControl)return showToast('Once rota olustur!',false);
+  navSteps=routingControl._routes&&routingControl._routes[0]?routingControl._routes[0].instructions:[];
+  if(!navSteps.length)return showToast('Adimlar alinamadi!',false);
+  navActive=true;navStepIdx=0;lastSpokenIdx=-1;
+  document.getElementById('navStartBtn').style.display='none';
+  document.getElementById('navStopBtn').style.display='';
+  document.getElementById('navStatus').style.display='none';
+  document.getElementById('navDirection').classList.add('show');
+  speak('Navigasyon basliyor.');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    navWatcher=navigator.geolocation.watchPosition(pos=>{
+      if(!navActive)return;
+      const lat=pos.coords.latitude,lon=pos.coords.longitude,spd=pos.coords.speed;
+      document.getElementById('navSpeed').textContent=spd?Math.round(spd*3.6):'0';
+      if(navMarker)map.removeLayer(navMarker);
+      const ni=L.divIcon({className:'',html:'<div style="width:20px;height:20px;background:#34d399;border-radius:50%;border:3px solid #fff;box-shadow:0 0 12px rgba(52,211,153,.8)"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+      navMarker=L.marker([lat,lon],{icon:ni}).addTo(map);
+      map.setView([lat,lon]);
+      if(navStepIdx<navSteps.length){
+        const cur=navSteps[navStepIdx];
+        const d=calcDist(lat,lon,(routingControl._routes[0].coordinates[cur.index]||{lat}).lat,(routingControl._routes[0].coordinates[cur.index]||{lng:lon}).lng);
+        document.getElementById('navArrow').innerHTML=getArrow(cur);
+        document.getElementById('navDirText').textContent=getStepText(cur);
+        document.getElementById('navDirDist').textContent=fmtDist(d);
+        const rem=navSteps.slice(navStepIdx).reduce((s,st)=>s+(st.distance||0),0);
+        document.getElementById('navDist').textContent=fmtDist(rem);
+        document.getElementById('navEta').textContent=Math.round(rem/60/13.9)+' dk';
+        if(d<20&&navStepIdx<navSteps.length-1){if(lastSpokenIdx!==navStepIdx){speak(getStepText(navSteps[navStepIdx+1]));lastSpokenIdx=navStepIdx;}navStepIdx++;}
+        if(cur.type==='arrive'&&d<30){speak('Varis noktasina ulastiniz.');stopNavigation();}
+      }
+    },()=>showToast('Konum takibi kesildi',false),{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
+  },()=>showToast('Konum alinamadi!',false));
+}
+function stopNavigation(){
+  navActive=false;
+  if(navWatcher!==null){navigator.geolocation.clearWatch(navWatcher);navWatcher=null;}
+  if(navMarker){map.removeLayer(navMarker);navMarker=null;}
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  document.getElementById('navStartBtn').style.display='';
+  document.getElementById('navStopBtn').style.display='none';
+  document.getElementById('navStatus').style.display='';
+  document.getElementById('navDirection').classList.remove('show');
+  ['navSpeed','navDist','navEta'].forEach(id=>document.getElementById(id).textContent=id==='navSpeed'?'0':'&#8212;');
+  showToast('Navigasyon durduruldu',true);
+}
+
+let reportLat=null,reportLon=null,selectedReportType=null;
+const REPORT_ICONS={kaza:'&#128680;',polis:'&#128110;',bozuk:'&#128371;',calisma:'&#128679;',trafik:'&#128663;',diger:'&#10067;'};
+const REPORT_NAMES={kaza:'Kaza',polis:'Polis/Radar',bozuk:'Bozuk Yol',calisma:'Yol Calismasi',trafik:'Yogun Trafik',diger:'Diger'};
+function getReportLocation(){navigator.geolocation.getCurrentPosition(pos=>{reportLat=pos.coords.latitude;reportLon=pos.coords.longitude;document.getElementById('reportLocInfo').textContent='Konum: '+reportLat.toFixed(5)+', '+reportLon.toFixed(5);},()=>{reportLat=map.getCenter().lat;reportLon=map.getCenter().lng;document.getElementById('reportLocInfo').textContent='Harita merkezi kullaniliyor';});}
+function selectReport(el,type){document.querySelectorAll('.report-type').forEach(e=>e.classList.remove('selected'));el.classList.add('selected');selectedReportType=type;}
+function submitReport(){
+  if(!selectedReportType)return showToast('Bir kategori sec!',false);
+  if(!reportLat||!reportLon)return showToast('Konum alinamadi!',false);
+  const report={type:selectedReportType,lat:reportLat,lon:reportLon,time:Date.now(),user:user.name||'Anonim'};
+  const reports=JSON.parse(localStorage.getItem('highly_reports')||'[]');
+  reports.push(report);if(reports.length>100)reports.splice(0,reports.length-100);
+  localStorage.setItem('highly_reports',JSON.stringify(reports));
+  addReportMarker(report);selectedReportType=null;
+  document.querySelectorAll('.report-type').forEach(e=>e.classList.remove('selected'));
+  showToast(REPORT_NAMES[report.type]+' bildirildi!',true);
+  if(map.getZoom()>=14)loadTrafficLayer();
+}
+function addReportMarker(r){
+  const icon=L.divIcon({className:'',html:`<div style="background:#0c0f1e;border:2px solid #f59e0b;border-radius:8px;padding:3px 5px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.5)">${REPORT_ICONS[r.type]||'?'}</div>`,iconSize:[32,32],iconAnchor:[16,16]});
+  const age=Math.round((Date.now()-r.time)/60000);
+  L.marker([r.lat,r.lon],{icon}).bindPopup('<b style="font-family:Syne,sans-serif">'+REPORT_NAMES[r.type]+'</b><br><small style="color:#6b7280">'+(age<1?'Az once':age+' dk once')+'</small>').addTo(map);
+}
+(function(){JSON.parse(localStorage.getItem('highly_reports')||'[]').filter(r=>Date.now()-r.time<30*60*1000).forEach(addReportMarker);})();
+
+function calcDistSimple(la1,lo1,la2,lo2){const dx=(la1-la2)*111000,dy=(lo1-lo2)*111000*Math.cos(la1*Math.PI/180);return Math.sqrt(dx*dx+dy*dy);}
+function getTrafficColor(lat,lon){const reports=JSON.parse(localStorage.getItem('highly_reports')||'[]'),near=reports.filter(r=>calcDistSimple(lat,lon,r.lat,r.lon)<200&&Date.now()-r.time<10*60*1000&&(r.type==='trafik'||r.type==='kaza'));if(near.length>2)return '#ef4444';if(near.length>0)return '#f59e0b';return '#34d399';}
+
+let tlMarkers=[];
+async function loadTrafficLights(){
+  if(map.getZoom()<15){tlMarkers.forEach(m=>map.removeLayer(m));tlMarkers=[];return;}
+  try{
+    const b=map.getBounds(),bbox=b.getSouth()+','+b.getWest()+','+b.getNorth()+','+b.getEast();
+    const data=await(await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent('[out:json][timeout:10];node["highway"="traffic_signals"]('+bbox+');out body;'))).json();
+    tlMarkers.forEach(m=>map.removeLayer(m));tlMarkers=[];
+    for(const node of data.elements.slice(0,60)){
+      const color=getTrafficColor(node.lat,node.lon);
+      const icon=L.divIcon({className:'',html:`<div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 6px ${color}"></div>`,iconSize:[12,12],iconAnchor:[6,6]});
+      tlMarkers.push(L.marker([node.lat,node.lon],{icon}).bindPopup('<b style="font-family:Syne,sans-serif">Trafik Isigi</b>').addTo(map));
+    }
+  }catch{}
+}
+map.on('zoomend moveend',()=>{if(map.getZoom()>=15)loadTrafficLights();else{tlMarkers.forEach(m=>map.removeLayer(m));tlMarkers=[];}});
+
+let is3D=false,buildingLayer=null;
+function toggle3D(btn){
+  is3D=!is3D;btn.classList.toggle('active',is3D);
+  if(is3D){load3D();map.on('moveend',load3D);}
+  else{if(buildingLayer){map.removeLayer(buildingLayer);buildingLayer=null;}map.off('moveend',load3D);}
+}
+async function load3D(){
+  if(!is3D||map.getZoom()<15){if(buildingLayer){map.removeLayer(buildingLayer);buildingLayer=null;}return;}
+  try{
+    const b=map.getBounds(),bbox=b.getSouth()+','+b.getWest()+','+b.getNorth()+','+b.getEast();
+    const data=await(await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent('[out:json][timeout:15];way["building"]('+bbox+');out body geom;'))).json();
+    if(buildingLayer){map.removeLayer(buildingLayer);buildingLayer=null;}
+    const features=data.elements.filter(e=>e.geometry).map(e=>({type:'Feature',properties:{h:parseInt(e.tags&&e.tags['building:levels']?e.tags['building:levels']*3:10)},geometry:{type:'Polygon',coordinates:[e.geometry.map(p=>[p.lon,p.lat])]}}));
+    buildingLayer=L.geoJSON({type:'FeatureCollection',features},{style:()=>({fillColor:'#1e2140',fillOpacity:.85,color:'#4f46e5',weight:1}),onEachFeature:(f,l)=>l.bindPopup('<b style="font-family:Syne,sans-serif">Bina</b><br><small style="color:#6b7280">~'+f.properties.h+'m</small>')}).addTo(map);
+  }catch{}
+}
+
+let trafficLayer=null,trafficOn=false;
+function toggleTraffic(btn){
+  trafficOn=!trafficOn;btn.classList.toggle('active',trafficOn);
+  document.getElementById('trafficLegend').style.display=trafficOn?'':'none';
+  if(trafficOn){loadTrafficLayer();map.on('moveend zoomend',loadTrafficLayer);}
+  else{if(trafficLayer){map.removeLayer(trafficLayer);trafficLayer=null;}map.off('moveend zoomend',loadTrafficLayer);}
+}
+async function loadTrafficLayer(){
+  if(!trafficOn||map.getZoom()<12){if(trafficLayer){map.removeLayer(trafficLayer);trafficLayer=null;}return;}
+  try{
+    const b=map.getBounds(),bbox=b.getSouth()+','+b.getWest()+','+b.getNorth()+','+b.getEast();
+    const data=await(await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent('[out:json][timeout:15];way["highway"~"motorway|trunk|primary|secondary|tertiary"]('+bbox+');out body geom;'))).json();
+    if(trafficLayer){map.removeLayer(trafficLayer);trafficLayer=null;}
+    const reports=JSON.parse(localStorage.getItem('highly_reports')||'[]'),now=Date.now();
+    const features=data.elements.filter(e=>e.geometry&&e.geometry.length>1).map(e=>{
+      const mid=e.geometry[Math.floor(e.geometry.length/2)],near=reports.filter(r=>calcDistSimple(mid.lat,mid.lon,r.lat,r.lon)<300&&(now-r.time)<30*60*1000&&(r.type==='trafik'||r.type==='kaza'));
+      let color='#34d399';if(near.length>=2)color='#ef4444';else if(near.length===1)color='#f59e0b';
+      return{type:'Feature',properties:{color,hw:e.tags&&e.tags.highway},geometry:{type:'LineString',coordinates:e.geometry.map(p=>[p.lon,p.lat])}};
+    });
+    trafficLayer=L.geoJSON({type:'FeatureCollection',features},{style:f=>({color:f.properties.color,weight:f.properties.hw==='motorway'||f.properties.hw==='trunk'?5:3,opacity:.75})}).addTo(map);
+  }catch{}
+}
+
+function showToast(msg,ok){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(ok?' ok':'');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
