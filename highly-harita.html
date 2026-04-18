@@ -130,9 +130,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 const SMART_STOPS = [{"id": "10130", "name": "BAŞİSKELE DURAĞI 1", "ilce": "BAŞİSKELE", "lat": 40.7150585, "lon": 29.9316066}, {"id": "10321", "name": "YUVACIK SAPAĞI 1", "ilce": "BAŞİSKELE", "lat": 40.7230431, "lon": 29.9503592}, {"id": "10867", "name": "DERİNCE 44 EVLER 3", "ilce": "DERİNCE", "lat": 40.756579, "lon": 29.819012}, {"id": "11290", "name": "ECE SOKAK", "ilce": "İZMİT", "lat": 40.786217, "lon": 29.97078}, {"id": "20074", "name": "BEŞ YOL 212. SOKAK 1", "ilce": "ÇAYIROVA", "lat": 40.8278675, "lon": 29.3821959}, {"id": "20202", "name": "ÇAYIROVA KÖPRÜSÜ", "ilce": "ÇAYIROVA", "lat": 40.8124455, "lon": 29.3687922}, {"id": "20219", "name": "YENİ MAHALLE PASTANE", "ilce": "ÇAYIROVA", "lat": 40.824005, "lon": 29.371973}, {"id": "20227", "name": "MESCİD-İ AKSA CAMİ", "ilce": "ÇAYIROVA", "lat": 40.829559, "lon": 29.3781423}, {"id": "20246", "name": "ÇAYIROVA KAYMAKAMLIK", "ilce": "ÇAYIROVA", "lat": 40.8590028, "lon": 29.3905569}, {"id": "30027", "name": "FARABİ DEVLET HASTANESİ", "ilce": "DARICA", "lat": 40.7726605, "lon": 29.407849}, {"id": "30028", "name": "FARABİ DEVLET HASTANESİ ACİL GİRİŞİ 1", "ilce": "DARICA", "lat": 40.7714824, "lon": 29.4042946}, {"id": "30029", "name": "FARABİ DEVLET HASTANESİ ACİL GİRİŞİ", "ilce": "DARICA", "lat": 40.7716437, "lon": 29.4054842}, {"id": "30052", "name": "ADNAN MENDERES KÜLTÜR MERKEZİ", "ilce": "DARICA", "lat": 40.7774496, "lon": 29.4049954}, {"id": "30063", "name": "İSTASYON KÖPRÜSÜ 1", "ilce": "DARICA", "lat": 40.7820346, "lon": 29.4112913}, {"id": "30078", "name": "CUMHURIYET MEYDANI", "ilce": "DARICA", "lat": 40.7624324, "lon": 29.3893493}, {"id": "30084", "name": "DARICA ZİRAAT BANKASI 1", "ilce": "DARICA", "lat": 40.7587924, "lon": 29.3837451}, {"id": "30207", "name": "ŞEHİT PİYADE ER MURAT ALTAY PARKI 1", "ilce": "DARICA", "lat": 40.791057, "lon": 29.373814}, {"id": "30346", "name": "NENEHATUN MUHTARLIĞI", "ilce": "DARICA", "lat": 40.7813167, "lon": 29.3849689}, {"id": "30388", "name": "MARMARAY TREN İSTASYONU 1", "ilce": "DARICA", "lat": 40.7833328, "lon": 29.4109904}, {"id": "40112", "name": "DERİNCE GEÇİT 1", "ilce": "DERİNCE", "lat": 40.756304, "lon": 29.830306}, {"id": "40117", "name": "DERİNCE 44 EVLER", "ilce": "DERİNCE", "lat": 40.756715, "lon": 29.816157}, {"id": "40128", "name": "DERİNCE GEÇİT 2", "ilce": "DERİNCE", "lat": 40.7558356, "lon": 29.8304408}, {"id": "40214", "name": "DERİNCE MERKEZ", "ilce": "DERİNCE", "lat": 40.7574424, "lon": 29.8310799}, {"id": "41712", "name": "AKÇAKOCABEY", "ilce": "İZMİT", "lat": 40.762643, "lon": 29.958411}, {"id": "41760", "name": "GEBZE CENTER AVM", "ilce": "GEBZE", "lat": 40.796844, "lon": 29.442766}, {"id": "41945", "name": "TATLIKUYU KÖPRÜSÜ", "ilce": "GEBZE", "lat": 40.7947013, "lon": 29.4326596}, {"id": "50030", "name": "DİLOVASI BELEDİYESİ 3", "ilce": "DİLOVASI", "lat": 40.7855268, "lon": 29.5411492}, {"id": "50053", "name": "ŞEHİT SEBAHATTİN DÜNDAR ÇEŞMESİ 2", "ilce": "DİLOVASI", "lat": 40.787804, "lon": 29.53373}, {"id": "50067", "name": "DİLİSKELESİ MEYDAN 1", "ilce": "DİLOVASI", "lat": 40.778965, "lon": 29.523218}, {"id": "60205", "name": "FATİH İMAM HATİP ORTAOKULU 1", "ilce": "GEBZE", "lat": 40.8039793, "lon": 29.3905587}, {"id": "60257", "name": "AHMET PENBEGÜLLÜ KÜLTÜR MERKEZİ", "ilce": "GEBZE", "lat": 40.798933, "lon": 29.4011694}, {"id": "60298", "name": "İBRAHİMAĞA CADDESİ 1", "ilce": "GEBZE", "lat": 40.8012833, "lon": 29.43149}, {"id": "60371", "name": "MEVLANA KAPALI PAZAR", "ilce": "GEBZE", "lat": 40.8124791, "lon": 29.4197741}, {"id": "60372", "name": "MEVLANA KAPALI PAZAR 1", "ilce": "GEBZE", "lat": 40.8124504, "lon": 29.4203132}, {"id": "60401", "name": "AK ÇARŞI", "ilce": "GEBZE", "lat": 40.7995321, "lon": 29.4303017}, {"id": "60403", "name": "MUSTAFA PAŞA CAMİ", "ilce": "GEBZE", "lat": 40.7989143, "lon": 29.4291871}, {"id": "60408", "name": "İSMETPAŞA CADDESİ", "ilce": "GEBZE", "lat": 40.7966663, "lon": 29.43303}, {"id": "60431", "name": "FATİH SULTAN MEHMET AKADEMİ LİSE", "ilce": "GEBZE", "lat": 40.795072, "lon": 29.4231906}, {"id": "60471", "name": "İSTASYON CADDESİ", "ilce": "GEBZE", "lat": 40.7899739, "lon": 29.4216289}, {"id": "60542", "name": "MUSTAFA ÜSTÜNDAĞ ORTAOKULU 1", "ilce": "GEBZE", "lat": 40.8287821, "lon": 29.4184993}, {"id": "60794", "name": "GEBZE CENTER KÖPRÜSÜ", "ilce": "GEBZE", "lat": 40.797601, "lon": 29.442667}, {"id": "60813", "name": "2744. SOKAK 1", "ilce": "GEBZE", "lat": 40.8241145, "lon": 29.464813}, {"id": "60863", "name": "EMLAK KONUT", "ilce": "GEBZE", "lat": 40.8261482, "lon": 29.4773381}, {"id": "70163", "name": "DONANMA 1", "ilce": "GÖLCÜK", "lat": 40.716904, "lon": 29.815998}, {"id": "70164", "name": "PERVANE 1", "ilce": "GÖLCÜK", "lat": 40.71674, "lon": 29.819054}, {"id": "70167", "name": "GÖLCÜK ESKİ GARAJLAR", "ilce": "GÖLCÜK", "lat": 40.7165701, "lon": 29.8235598}, {"id": "70168", "name": "DUMLUPINAR İSKELE YOLU 1", "ilce": "GÖLCÜK", "lat": 40.7154133, "lon": 29.8303136}, {"id": "70212", "name": "HALIDERE MERKEZ", "ilce": "GÖLCÜK", "lat": 40.7161249, "lon": 29.7530231}, {"id": "70264", "name": "DEĞİRMENDERE MERKEZ", "ilce": "GÖLCÜK", "lat": 40.7211178, "lon": 29.7824844}, {"id": "70279", "name": "GÖLCÜK NECATİ ÇELİK DEVLET HASTANESİ 1", "ilce": "GÖLCÜK", "lat": 40.7180181, "lon": 29.7937111}, {"id": "70420", "name": "GÖLCÜK PERVANE", "ilce": "GÖLCÜK", "lat": 40.716846, "lon": 29.818645}, {"id": "80025", "name": "EREN CAMİ", "ilce": "İZMİT", "lat": 40.7649733, "lon": 29.9388706}, {"id": "80037", "name": "İZMİT TREN İSTASYONU", "ilce": "İZMİT", "lat": 40.7622069, "lon": 29.9189969}, {"id": "80041", "name": "İZMİT LİSESİ", "ilce": "İZMİT", "lat": 40.7659098, "lon": 29.9274027}, {"id": "80045", "name": "ÇINARLI CAMİ", "ilce": "İZMİT", "lat": 40.766723, "lon": 29.9331675}, {"id": "80048", "name": "KOCAELİ DEVLET HASTANESİ", "ilce": "İZMİT", "lat": 40.767813, "lon": 29.937741}, {"id": "80049", "name": "MİMAR SİNAN ANADOLU LİSESİ", "ilce": "İZMİT", "lat": 40.768364, "lon": 29.9394802}, {"id": "80057", "name": "ZİNCİRLİKUYU CAMİ", "ilce": "İZMİT", "lat": 40.7716551, "lon": 29.9493929}, {"id": "80066", "name": "KÜTÜPHANE", "ilce": "İZMİT", "lat": 40.765627, "lon": 29.9344691}, {"id": "80078", "name": "KURUÇEŞME MERKEZ", "ilce": "İZMİT", "lat": 40.765381, "lon": 29.877556}, {"id": "80129", "name": "ŞİRİNTEPE ÜST GEÇİT 1", "ilce": "İZMİT", "lat": 40.7615205, "lon": 29.8607742}, {"id": "80164", "name": "İZMİT LİSESİ D 100", "ilce": "İZMİT", "lat": 40.763842, "lon": 29.8909683}, {"id": "80335", "name": "EMNİYET ASAYİŞ ŞUBE MÜDÜRLÜĞÜ", "ilce": "İZMİT", "lat": 40.7622214, "lon": 29.9363463}, {"id": "80336", "name": "ESNAF KEFALET", "ilce": "İZMİT", "lat": 40.7618336, "lon": 29.9301768}, {"id": "80337", "name": "FEVZİYE KUZEY YAN YOL 1", "ilce": "İZMİT", "lat": 40.7617012, "lon": 29.9234567}, {"id": "80338", "name": "FEVZİYE KUZEY YAN YOL", "ilce": "İZMİT", "lat": 40.7615325, "lon": 29.9238063}, {"id": "80340", "name": "TURGUT ÖZAL KÖPRÜSÜ D 100", "ilce": "İZMİT", "lat": 40.7619649, "lon": 29.9360791}, {"id": "80341", "name": "KOCAELİ VALİLİĞİ", "ilce": "İZMİT", "lat": 40.7627881, "lon": 29.9462155}, {"id": "80344", "name": "ADNAN MENDERES D 100 1", "ilce": "İZMİT", "lat": 40.761513, "lon": 29.926487}, {"id": "80346", "name": "DOSTLUK SİTESİ", "ilce": "İZMİT", "lat": 40.7665109, "lon": 29.907493}, {"id": "80347", "name": "YENİDOĞAN D 100", "ilce": "İZMİT", "lat": 40.7670528, "lon": 29.9031065}, {"id": "80348", "name": "SEKA DEVLET HASTANESİ D 100", "ilce": "İZMİT", "lat": 40.7657031, "lon": 29.8983139}, {"id": "80351", "name": "KURUÇEŞME IŞIKLAR", "ilce": "İZMİT", "lat": 40.764091, "lon": 29.875057}, {"id": "80352", "name": "SGK İL MÜDÜRLÜĞÜ D 100", "ilce": "İZMİT", "lat": 40.7629814, "lon": 29.8777459}, {"id": "80353", "name": "EĞİTİM KAMPÜSÜ 1", "ilce": "İZMİT", "lat": 40.7637439, "lon": 29.8917603}, {"id": "80356", "name": "SEKA DEVLET HASTANESİ D 100 1", "ilce": "İZMİT", "lat": 40.766273, "lon": 29.900068}, {"id": "80357", "name": "YENİDOĞAN D 100 1", "ilce": "İZMİT", "lat": 40.7665931, "lon": 29.904174}, {"id": "80359", "name": "SEKA", "ilce": "İZMİT", "lat": 40.7651704, "lon": 29.9112439}, {"id": "80361", "name": "YENİ CUMA DOĞU", "ilce": "İZMİT", "lat": 40.761527, "lon": 29.9322986}, {"id": "80362", "name": "ADNAN MENDERES D 100", "ilce": "İZMİT", "lat": 40.7612467, "lon": 29.9257697}, {"id": "80363", "name": "VALİLİK D 100", "ilce": "İZMİT", "lat": 40.762277, "lon": 29.945608}, {"id": "80370", "name": "ADNAN MENDERES GÜNEY YANYOL", "ilce": "İZMİT", "lat": 40.760838, "lon": 29.924423}, {"id": "80371", "name": "MİMAR SİNAN GÜNEY YANYOL", "ilce": "İZMİT", "lat": 40.760964, "lon": 29.931273}, {"id": "80372", "name": "İZMİT MİLLET BAHÇESİ", "ilce": "İZMİT", "lat": 40.7612428, "lon": 29.9374157}, {"id": "80374", "name": "SADIK AHMET ÜST GEÇİDİ 1", "ilce": "İZMİT", "lat": 40.755127, "lon": 29.94712}, {"id": "80388", "name": "SADIK AHMET ÜST GEÇİDİ", "ilce": "İZMİT", "lat": 40.756036, "lon": 29.946358}, {"id": "80398", "name": "LEYLA ATAKAN CADDESİ", "ilce": "İZMİT", "lat": 40.763547, "lon": 29.9348}, {"id": "80525", "name": "KANDIRA SAPAĞI 1", "ilce": "İZMİT", "lat": 40.7623359, "lon": 29.9551792}, {"id": "80528", "name": "YAHYA KAPTAN GÜNEY YANYOL", "ilce": "İZMİT", "lat": 40.7600823, "lon": 29.9756581}, {"id": "80572", "name": "YAHYA KAPTAN 5", "ilce": "İZMİT", "lat": 40.763363, "lon": 29.971843}, {"id": "80624", "name": "İZMİT OTOGAR 2", "ilce": "İZMİT", "lat": 40.775292, "lon": 29.972487}, {"id": "80651", "name": "BAYINDIRLIK İŞ MERKEZİ", "ilce": "İZMİT", "lat": 40.801357, "lon": 29.974152}, {"id": "80868", "name": "SEKA CAMİ", "ilce": "İZMİT", "lat": 40.763582, "lon": 29.913451}, {"id": "90028", "name": "AKÇAKOCA İLKOKULU", "ilce": "KANDIRA", "lat": 41.068511, "lon": 30.153206}, {"id": "94164", "name": "KARAMÜRSEL İMAM HATİP ORTAOKULU", "ilce": "KARAMÜRSEL", "lat": 40.691974, "lon": 29.618831}, {"id": "96275", "name": "KARTEPE İSTASYON 1", "ilce": "KARTEPE", "lat": 40.75326, "lon": 30.022679}, {"id": "96285", "name": "ÇELİK HALAT ÜST GEÇİDİ", "ilce": "KARTEPE", "lat": 40.7507906, "lon": 30.0426209}, {"id": "96577", "name": "KARTEPE İSTASYON", "ilce": "KARTEPE", "lat": 40.753704, "lon": 30.022463}, {"id": "98025", "name": "TÜTÜNÇİFTLİK MERKEZ 3", "ilce": "KÖRFEZ", "lat": 40.760823, "lon": 29.787205}, {"id": "98027", "name": "95 EVLER", "ilce": "KÖRFEZ", "lat": 40.75826, "lon": 29.7944693}, {"id": "98028", "name": "KÖRFEZ KAYMAKAMLIK", "ilce": "KÖRFEZ", "lat": 40.7696996, "lon": 29.7647399}, {"id": "98036", "name": "TÜTÜNÇİFTLİK MERKEZ", "ilce": "KÖRFEZ", "lat": 40.762181, "lon": 29.785038}, {"id": "98039", "name": "KÖRFEZ DIŞ HASTANESİ 1", "ilce": "KÖRFEZ", "lat": 40.7660788, "lon": 29.7752532}, {"id": "98278", "name": "KÖRFEZ DİŞ HASTANESİ", "ilce": "KÖRFEZ", "lat": 40.765653, "lon": 29.775072}, {"id": "98293", "name": "KÖRFEZ BELEDİYESİ", "ilce": "KÖRFEZ", "lat": 40.7734687, "lon": 29.7442871}];
 
 // API base - Kocaeli Buyuksehir Belediyesi open data
-const API_BASE = 'https://openapi.kocaeli.bel.tr';
+// Kocaeli BB acik veri portali
+// ekran bilgileri (gercek zamanli, tercihli)
 const API_SCREEN = '/api/OpenData/c7b7c933-7913-4483-937d-4760f7e5e29b';
+// durak bilgileri (fallback)
 const API_STOP   = '/api/OpenData/a9604fe2-c723-41fd-bf74-6cea8af16a54';
+// Base URL deneme listesi - hangisi cevap verirse onu kullan
+const API_BASES  = [
+  'https://veri.kocaeli.bel.tr',
+  'https://akillisehirapi.kocaeli.bel.tr'
+];
 
 // Auth
 const saved = localStorage.getItem('highly_user');
@@ -216,30 +223,31 @@ async function fetchBuses(stopId) {
   const body = document.getElementById('ssBody');
   try {
     // Ekran API - durak ID filtresi ile
-    const url = API_BASE + API_SCREEN + '?DurakId=' + stopId;
-    const res = await fetch(url, {
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    renderBuses(body, data, stopId);
-  } catch (err) {
-    // Fallback: ikinci endpoint dene
-    try {
-      const url2 = API_BASE + API_STOP + '?DurakId=' + stopId;
-      const res2 = await fetch(url2, { headers: { 'Accept': 'application/json' } });
-      if (!res2.ok) throw new Error('HTTP ' + res2.status);
-      const data2 = await res2.json();
-      renderBuses(body, data2, stopId);
-    } catch (err2) {
-      body.innerHTML = `
-        <div class="api-error">
-          <div style="font-size:22px;margin-bottom:6px">&#128531;</div>
-          <div>Baglanti kurulamadi</div>
-          <div style="margin-top:4px;font-size:11px;color:#9ca3af">${err2.message}</div>
-          <button class="refresh-btn" onclick="fetchBuses('${stopId}')">&#8635; Tekrar Dene</button>
-        </div>`;
+    // Tum base URL + endpoint kombinasyonlarini sirayla dene
+    const combos = [];
+    for (const base of API_BASES) {
+      combos.push(base + API_SCREEN + '?DurakId=' + stopId);
+      combos.push(base + API_STOP   + '?DurakId=' + stopId);
     }
+    let lastErr = null;
+    for (const url of combos) {
+      try {
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) { lastErr = 'HTTP ' + res.status; continue; }
+        const data = await res.json();
+        renderBuses(body, data, stopId);
+        return;
+      } catch (e) { lastErr = e.message; }
+    }
+    // Hicbiri calismadi
+    body.innerHTML = `
+      <div class="api-error">
+        <div style="font-size:22px;margin-bottom:6px">&#128531;</div>
+        <div>Sunucuya baglanilamadi</div>
+        <div style="margin-top:4px;font-size:11px;color:#9ca3af">${lastErr||''}</div>
+        <div style="margin-top:6px;font-size:11px;color:#6b7280">API: veri.kocaeli.bel.tr</div>
+        <button class="refresh-btn" onclick="fetchBuses('${stopId}')">&#8635; Tekrar Dene</button>
+      </div>`;
   }
 }
 
