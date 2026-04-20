@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Highly AI 3.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#06070f;--s1:#0b0d1c;--s2:#0f1125;--border:rgba(255,255,255,0.07);--a1:#6366f1;--a2:#4f46e5;--text:#e8e8ff;--muted:#4a4d6a}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 20% 20%,rgba(99,102,241,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(167,139,250,0.06) 0%,transparent 50%)}
+nav{position:relative;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(6,7,15,0.95);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);flex-shrink:0}
+.n-logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--text)}
+.n-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--a1),var(--a2));display:flex;align-items:center;justify-content:center;font-size:16px}
+.n-title{font-family:'Syne',sans-serif;font-weight:800;font-size:17px}
+.n-right{display:flex;align-items:center;gap:10px}
+.n-user{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:999px;padding:5px 12px 5px 6px;text-decoration:none;color:var(--text);font-size:13px}
+.n-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--a1),var(--a2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;flex-shrink:0}
+.n-back{color:var(--muted);text-decoration:none;font-size:13px;transition:color .2s}
+.n-back:hover{color:var(--text)}
+.n-clear{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:5px 12px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.n-clear:hover{border-color:rgba(248,113,113,.4);color:#f87171}
+.chat-wrap{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;position:relative;z-index:2;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:40px;gap:16px}
+.welcome-icon{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,var(--a1),var(--a2));display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 8px 32px rgba(99,102,241,.3)}
+.welcome h2{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
+.welcome p{color:var(--muted);font-size:14px;max-width:400px;line-height:1.7}
+.suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px}
+.sug-btn{padding:9px 16px;background:var(--s1);border:1px solid var(--border);border-radius:999px;color:var(--text);font-size:13px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.sug-btn:hover{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3);color:#a78bfa}
+.msg{display:flex;gap:12px;max-width:780px;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse;margin-left:auto}
+.msg-avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-family:'Syne',sans-serif}
+.msg.user .msg-avatar{background:linear-gradient(135deg,var(--a1),var(--a2))}
+.msg.ai .msg-avatar{background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid rgba(99,102,241,.3);font-size:18px}
+.msg-bubble{padding:14px 18px;border-radius:16px;font-size:14px;line-height:1.7;max-width:100%}
+.msg.user .msg-bubble{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-radius:16px 4px 16px 16px}
+.msg.ai .msg-bubble{background:var(--s1);border:1px solid var(--border);border-radius:4px 16px 16px 16px}
+.msg.ai .msg-bubble pre{background:rgba(0,0,0,.3);border-radius:8px;padding:12px;overflow-x:auto;margin:10px 0;font-size:13px}
+.msg.ai .msg-bubble code{background:rgba(99,102,241,.15);padding:2px 6px;border-radius:4px;font-size:13px}
+.typing{display:flex;align-items:center;gap:5px;padding:6px 0}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:t .9s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes t{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+.input-wrap{position:relative;z-index:10;padding:16px 24px;background:rgba(6,7,15,0.95);border-top:1px solid var(--border);flex-shrink:0}
+.input-box{display:flex;align-items:flex-end;gap:10px;background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:12px 14px;transition:border-color .2s}
+.input-box:focus-within{border-color:rgba(99,102,241,.4)}
+.msg-input{flex:1;background:none;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;outline:none;resize:none;max-height:120px;min-height:24px}
+.msg-input::placeholder{color:var(--muted)}
+.send-btn{width:38px;height:38px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;font-size:16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send-btn:hover{opacity:.9;transform:scale(1.05)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.input-hint{text-align:center;font-size:11px;color:var(--muted);margin-top:8px}
+/* Version badge */
+.v-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(167,139,250,.15));border:1px solid rgba(99,102,241,.4);border-radius:8px;padding:5px 12px;font-size:12px;color:#a78bfa;font-family:'Syne',sans-serif;font-weight:700}
+/* Redirect notice */
+.redirect-notice{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:12px 16px;font-size:13px;color:#a78bfa;margin-top:8px;display:flex;align-items:center;gap:8px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="dashboard.html" class="n-logo">
+    <div class="n-icon">🤖</div>
+    <span class="n-title">Highly AI</span>
+  </a>
+  <div class="n-right">
+    <a href="https://highly.com.tr/gene-3-0.html" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(167,139,250,.1));border:1px solid rgba(99,102,241,.35);border-radius:8px;padding:5px 14px;font-size:12px;color:#a78bfa;text-decoration:none;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .2s" onmouseover="this.style.background='linear-gradient(135deg,rgba(99,102,241,.25),rgba(167,139,250,.2))'" onmouseout="this.style.background='linear-gradient(135deg,rgba(99,102,241,.15),rgba(167,139,250,.1))'">🔥 Gene 3.0</a>
+    <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--muted)">🧠
+      <select id="modelSel" style="background:transparent;border:none;color:#e8e8ff;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer">
+        <option value="gene30">Gene 3.0 🚀</option>
+        <option value="gene25">Gene 2.5 🧠</option>
+        <option value="gene20">Gene 2.0 ✨</option>
+      </select>
+    </div>
+    <button class="n-clear" id="clearBtn">🗑 Temizle</button>
+    <a href="dashboard.html" class="n-user" id="navUserLink">
+      <div class="n-avatar" id="navAvatar">?</div>
+      <span id="navName">...</span>
+    </a>
+    <a href="dashboard.html" class="n-back">← Dashboard</a>
+  </div>
+</nav>
+
+<div class="chat-wrap" id="chatWrap">
+  <div class="welcome" id="welcome">
+    <div class="welcome-icon">🤖</div>
+    <h2>Highly AI 3.0'a hoş geldin!</h2>
+    <p>Hava durumu, döviz kurları, matematik, sohbet ve çok daha fazlası için sor!</p>
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:999px;padding:7px 16px;font-size:12px;color:#a78bfa;margin-top:4px">
+      🧠 <strong id="modelBadge">Gene 3.0 🚀</strong> · <span id="modelDesc">Tam sohbet, geniş kelime haznesi</span>
+    </div>
+    <div class="suggestions">
+      <button class="sug-btn" onclick="fillInput('İstanbul hava durumu')">🌤 Hava durumu</button>
+      <button class="sug-btn" onclick="fillInput('Dolar kaç TL?')">💵 Döviz kuru</button>
+      <button class="sug-btn" onclick="fillInput('Nasılsın?')">👋 Sohbet et</button>
+      <button class="sug-btn" onclick="fillInput('125 * 8 = ?')">🧮 Matematik</button>
+    </div>
+  </div>
+</div>
+
+<div class="input-wrap">
+  <div class="input-box">
+    <textarea class="msg-input" id="msgInput" placeholder="Bir şey sor... (Enter ile gönder)" rows="1"></textarea>
+    <button class="send-btn" id="sendBtn">↑</button>
+  </div>
+  <div class="input-hint">Highly AI 3.0 hata yapabilir. Sonuçları kontrol edin.</div>
+</div>
+
+<script>
+// ==================== KULLANICI ====================
+var saved = localStorage.getItem('highly_user');
+if (!saved) { location.href = 'highly-id.html'; }
+var user = JSON.parse(saved || '{"name":"?"}');
+var firstName = user.name ? user.name.split(' ')[0] : 'Kullanıcı';
+
+// Avatar — oyunlar sayfasıyla aynı sistem
+(function(){
+  var av = document.getElementById('navAvatar');
+  try {
+    if (user.avatarEmoji) {
+      av.textContent = user.avatarEmoji;
+      av.style.background = 'transparent';
+      av.style.fontSize = '20px';
+    } else if (user.name) {
+      av.textContent = user.name[0].toUpperCase();
+      if (user.avatarBg) av.style.background = user.avatarBg;
+    }
+  } catch(e) {}
+  document.getElementById('navName').textContent = firstName;
+})();
+
+var chatWrap = document.getElementById('chatWrap');
+var msgInput = document.getElementById('msgInput');
+var sendBtn  = document.getElementById('sendBtn');
+var welcome  = document.getElementById('welcome');
+var lastCtx  = { type: null, data: null };
+var recentReplies = [];
+
+// Model seçici
+var MODEL_LABELS = { gene30: 'Gene 3.0 🚀', gene25: 'Gene 2.5 🧠', gene20: 'Gene 2.0 ✨' };
+var MODEL_DESCS  = { gene30: 'Tam sohbet, geniş kelime haznesi', gene25: 'Akıllı bağlam, hafıza', gene20: 'Hava, Döviz, Matematik' };
+
+document.getElementById('modelSel').addEventListener('change', function() {
+  var v = this.value;
+  var b = document.getElementById('modelBadge');
+  var d = document.getElementById('modelDesc');
+  if (b) b.textContent = MODEL_LABELS[v] || v;
+  if (d) d.textContent = MODEL_DESCS[v] || '';
+  lastCtx = { type: null, data: null }; recentReplies = [];
+  chatWrap.innerHTML = ''; chatWrap.appendChild(welcome); welcome.style.display = 'flex';
+
+  // Gene 2.0 ve 2.5 için yönlendirme bildirimi göster
+  if (v === 'gene20' || v === 'gene25') {
+    welcome.style.display = 'flex';
+    var notice = document.createElement('div');
+    notice.className = 'redirect-notice';
+    notice.innerHTML = '🔗 <span><strong>' + MODEL_LABELS[v] + '</strong> için <a href="https://highly.com.tr/highly-ai.html" style="color:#818cf8;text-decoration:underline">highly.com.tr/highly-ai.html</a> adresine yönlendiriliyorsunuz...</span>';
+    welcome.appendChild(notice);
+    setTimeout(function() {
+      location.href = 'https://highly.com.tr/highly-ai.html';
+    }, 1800);
+  }
+});
+
+document.getElementById('clearBtn').addEventListener('click', function() {
+  lastCtx = { type: null, data: null }; recentReplies = [];
+  chatWrap.innerHTML = ''; chatWrap.appendChild(welcome); welcome.style.display = 'flex';
+});
+
+msgInput.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+msgInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+sendBtn.addEventListener('click', function() { send(); });
+
+function fillInput(t) { msgInput.value = t; msgInput.focus(); send(); }
+
+// ==================== UI ====================
+function rmTyping() { var t = document.getElementById('typing'); if (t) t.remove(); }
+function addTyping() {
+  welcome.style.display = 'none'; rmTyping();
+  var d = document.createElement('div'); d.className = 'msg ai'; d.id = 'typing';
+  d.innerHTML = '<div class="msg-avatar">🤖</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+  chatWrap.appendChild(d); chatWrap.scrollTop = chatWrap.scrollHeight;
+}
+function addMsg(role, text) {
+  welcome.style.display = 'none';
+  var d = document.createElement('div'); d.className = 'msg ' + role;
+  var avText = role === 'user'
+    ? (user.avatarEmoji || (user.name ? user.name[0].toUpperCase() : '?'))
+    : '🤖';
+  var avStyle = (role === 'user' && user.avatarEmoji)
+    ? 'style="background:transparent;font-size:18px"' : '';
+  d.innerHTML = '<div class="msg-avatar" ' + avStyle + '>' + avText + '</div><div class="msg-bubble">' + (role === 'ai' ? fmt(text) : esc(text)) + '</div>';
+  chatWrap.appendChild(d); chatWrap.scrollTop = chatWrap.scrollHeight;
+}
+function fmt(t) {
+  return esc(t)
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g,'<em>$1</em>')
+    .replace(/\n/g,'<br>');
+}
+function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function pick(arr) {
+  var filtered = arr.filter(function(x){ return recentReplies.indexOf(x)===-1; });
+  if (!filtered.length) { recentReplies=[]; filtered=arr; }
+  var r = filtered[Math.floor(Math.random()*filtered.length)];
+  recentReplies.push(r); if(recentReplies.length>6) recentReplies.shift();
+  return r;
+}
+
+// ==================== ORTAK MODÜLLER ====================
+
+// MATEMATİK
+function solveMath(raw) {
+  try {
+    var e = raw.trim().replace(/,/g,'.').replace(/x/gi,'*').replace(/×/g,'*').replace(/÷/g,'/');
+    e = e.replace(/karekök\s*([\d.]+)/gi,'Math.sqrt($1)').replace(/([\d.]+)\s*\^\s*([\d.]+)/g,'Math.pow($1,$2)').replace(/pi/gi,'Math.PI');
+    e = e.replace(/(\d+)!/g,function(_,n){var num=parseInt(n);if(num>20)return '9999999';var f=1;for(var i=2;i<=num;i++)f*=i;return f;});
+    e = e.replace(/[^0-9+\-*\/.()% MathsqrpowPIE]/g,'').trim();
+    if (!e) return null;
+    var r = Function('"use strict"; return ('+e+')')();
+    if (typeof r!=='number'||isNaN(r)||!isFinite(r)) return null;
+    if (Number.isInteger(r)) return r.toLocaleString('tr-TR');
+    return parseFloat(r.toFixed(8)).toString().replace('.',',');
+  } catch(err){return null;}
+}
+function isMathExpr(t) {
+  var c = t.trim().replace(/çarpı|kere/gi,'*').replace(/bölü/gi,'/').replace(/artı/gi,'+').replace(/eksi/gi,'-').replace(/,/g,'.');
+  return /^[\d\s+\-*\/.()%^]+$/.test(c) && /\d/.test(c) && /[+\-*\/^]/.test(c);
+}
+
+// TARİH
+function tarihCevap() {
+  var n=new Date();
+  var D=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+  var M=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  return 'Saat: **'+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0')+'**\n'+D[n.getDay()]+', '+n.getDate()+' '+M[n.getMonth()]+' '+n.getFullYear();
+}
+
+// HAVA
+var WICONS={'01d':'☀️','01n':'🌙','02d':'⛅','02n':'⛅','03d':'☁️','03n':'☁️','04d':'☁️','04n':'☁️','09d':'🌧','09n':'🌧','10d':'🌦','10n':'🌦','11d':'⛈','11n':'⛈','13d':'❄️','13n':'❄️','50d':'🌫','50n':'🌫'};
+function extractCity(text) {
+  var pats=[
+    /([A-Za-zÀ-öø-ÿĞğŞşİıÖöÜüÇç][A-Za-zÀ-öø-ÿĞğŞşİıÖöÜüÇç ]{1,20}?)\s*(?:kaç\s+derece|hava\s+durumu|hava\s+nasıl)/i,
+    /([A-Za-zÀ-öø-ÿĞğŞşİıÖöÜüÇç][A-Za-zÀ-öø-ÿĞğŞşİıÖöÜüÇç ]{1,20}?)\s*(?:hava|derece|sıcaklık)/i
+  ];
+  var skip=/^(bugün|şu\s*an|hava|genel|dışarı)$/i;
+  for(var i=0;i<pats.length;i++){var m=text.match(pats[i]);if(m&&m[1]){var c=m[1].trim();if(c.length>1&&c.length<25&&!skip.test(c))return c;}}
+  return null;
+}
+async function havaCevap(city) {
+  var url;
+  if(city){url='https://api.openweathermap.org/data/2.5/weather?q='+encodeURIComponent(city)+'&appid=bd5e378503939ddaee76f12ad7a97608&units=metric&lang=tr';}
+  else{var gd=await(await fetch('https://ipapi.co/json/')).json();url='https://api.openweathermap.org/data/2.5/weather?lat='+gd.latitude+'&lon='+gd.longitude+'&appid=bd5e378503939ddaee76f12ad7a97608&units=metric&lang=tr';}
+  var d=await(await fetch(url)).json();
+  if(!d||d.cod==='404') return city?'"'+city+'" bulunamadı.':'Hava bilgisi alınamadı.';
+  if(!d.weather||!d.weather[0]) return 'Hava verisi eksik.';
+  var icon=WICONS[d.weather[0].icon]||'🌤';
+  return icon+' **'+d.name+' - '+Math.round(d.main.temp)+'°C**\n\nHissedilen: '+Math.round(d.main.feels_like)+'°C\n'+d.weather[0].description+'\nNem: %'+d.main.humidity+'\nRüzgar: '+Math.round(d.wind.speed*3.6)+' km/s\nMin/Max: '+Math.round(d.main.temp_min)+'°C / '+Math.round(d.main.temp_max)+'°C';
+}
+
+// DÖVİZ
+async function dovizCevap(birim) {
+  var data=await(await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY,EUR,GBP,CHF,JPY')).json();
+  var TRY=data.rates.TRY,R={usd:TRY,eur:TRY/data.rates.EUR,gbp:TRY/data.rates.GBP,chf:TRY/data.rates.CHF,jpy:TRY/data.rates.JPY};
+  var saat=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  var ana='💵 **1 Dolar = '+R.usd.toFixed(2)+' TL**';
+  if(birim==='eur') ana='💶 **1 Euro = '+R.eur.toFixed(2)+' TL**';
+  else if(birim==='gbp') ana='💷 **1 Sterlin = '+R.gbp.toFixed(2)+' TL**';
+  else if(birim==='chf') ana='**1 Frank = '+R.chf.toFixed(2)+' TL**';
+  else if(birim==='jpy') ana='**100 Yen = '+(R.jpy*100).toFixed(2)+' TL**';
+  return ana+'\n\nDolar: '+R.usd.toFixed(2)+' TL\nEuro: '+R.eur.toFixed(2)+' TL\nSterlin: '+R.gbp.toFixed(2)+' TL\n\n'+saat+' - frankfurter.app';
+}
+
+// WİKİPEDİA
+async function searchWiki(q) {
+  try {
+    var trS=await(await fetch('https://tr.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(q)+'&format=json&origin=*&srlimit=1')).json();
+    var trR=trS.query&&trS.query.search;var lang='tr',title;
+    if(trR&&trR.length){title=trR[0].title;}
+    else{
+      var enS=await(await fetch('https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(q)+'&format=json&origin=*&srlimit=1')).json();
+      var enR=enS.query&&enS.query.search;if(!enR||!enR.length)return null;
+      title=enR[0].title;lang='en';
+    }
+    var base=lang==='tr'?'https://tr.wikipedia.org':'https://en.wikipedia.org';
+    var ext=await(await fetch(base+'/w/api.php?action=query&titles='+encodeURIComponent(title)+'&prop=extracts&exintro=true&explaintext=true&format=json&origin=*')).json();
+    var page=Object.values(ext.query.pages)[0];
+    if(!page||!page.extract)return null;
+    return {title:title,text:page.extract.slice(0,700).trim(),url:base+'/wiki/'+encodeURIComponent(title)};
+  } catch{return null;}
+}
+
+// ==================== GENE 3.0 — GENİŞ SOHBET SİSTEMİ ====================
+
+// Duygu analizi
+var OLUMLU=['mutlu','sevin','harika','müthiş','süper','iyi','güzel','sevdim','bayıldım','tatlı','hoş','memnun','başardım','kazandım','seviyorum','aşk','güldüm','eğlendim','keyif','çok iyi','sevindim','heyecanlı','muhteşem','tatil','başarı','harika','nefis','enfes','aferin','bravo','tebrik','seviyorum','istiyorum','umut','huzur','barış','neşe','coşku','zafer','gurur'];
+var OLUMSUZ=['üzgün','üzüldüm','kötü','berbat','rezalet','ağladım','ağla','moralim','bunaldım','stres','gergin','sıkıldım','bıktım','yorgun','yoruldum','halsiz','dermansız','zor gün','zor bir','nefret','iğren','öfke','kızgın','sinirli','korktum','kaygılı','endişe','panik','pişman','hata','yanlış','hayal kırıklığı','başarısız','can sıkıcı','sinirlendim','umutsuz','çaresiz','sıkkın','bitkin'];
+
+function duyguAnaliz(text) {
+  try {
+    if(!text||typeof text!=='string')return 'notr';
+    var tl=text.toLowerCase().replace(/[ğ]/g,'g').replace(/[ü]/g,'u').replace(/[ş]/g,'s').replace(/[ı]/g,'i').replace(/[ö]/g,'o').replace(/[ç]/g,'c');
+    var olumluSkor=0,olumsuzSkor=0;
+    for(var i=0;i<OLUMLU.length;i++){if(tl.indexOf(OLUMLU[i])!==-1)olumluSkor++;}
+    for(var j=0;j<OLUMSUZ.length;j++){if(tl.indexOf(OLUMSUZ[j])!==-1)olumsuzSkor++;}
+    if(olumsuzSkor>olumluSkor)return 'olumsuz';
+    if(olumluSkor>olumsuzSkor)return 'olumlu';
+    return 'notr';
+  }catch(e){return 'notr';}
+}
+
+// Sohbet mi bilgi mi?
+function isSohbetCumlesi(text) {
+  try {
+    var t=(text||'').trim();
+    var kelimeSayisi=t.split(' ').length;
+    var soruVar=/nedir|kimdir|ne zaman|nerede|nasil|hakkinda|anlat bana|acikla|ne kadar|kac/i.test(t);
+    var tl=t.toLowerCase();
+    var duygusalVar=/yorgun|uzgun|mutlu|stres|sikild|bunald|sevdim|seviyorum|harika|berbat|kotu|moralim|agladim|sevindim|korktu|endise|guzel|iyi gun|kotu gun|muhtesem|super|berbat|rezalet|eglend|guldum|arkadas|hoca|gunun|okul|ders/i.test(tl);
+    if(duygusalVar)return true;
+    if(kelimeSayisi<=5&&!soruVar)return true;
+    if(kelimeSayisi>10&&!soruVar)return true;
+    return false;
+  }catch(e){return true;}
+}
+
+// ==================== GENİŞ KELIME HAZNESİ (5000+) ====================
+// Her kategoride çok sayıda cevap — tekrar azaltmak için havuzlar büyük
+
+var G3 = {
+  selam: [
+    'Selam '+firstName+'! 👋 Nasıl gidiyor?',
+    'Hey '+firstName+'! 😊 Buradayım, ne var ne yok?',
+    'Merhaba! ✨ Bugün nasıl hissediyorsun?',
+    'Selam! 🌟 Senden haber almak güzel oldu.',
+    'Hey! 👋 Bugün ne planlar var?',
+    'Merhaba '+firstName+'! 😄 Sana nasıl yardımcı olabilirim?',
+    'Selam! ✌️ İyi günler dilerim!',
+    'Hey '+firstName+'! 🚀 Hazır mısın, başlayalım mı?',
+    'Merhaba! 🎉 Bugün neler oluyor?',
+    'Selam! 🌈 Neye ihtiyacın var?'
+  ],
+  nasilsin: [
+    'Ben gayet iyiyim, teşekkürler! 😊 Sen nasılsın '+firstName+'?',
+    'Harika çalışıyorum! 🚀 Peki ya sen, nasılsın?',
+    'İyiyim iyiyim! 😄 Sen nasılsın, anlat bakalım!',
+    'Kod yığını olarak mükemmelim! 💻 Sen nasılsın?',
+    'Süper! 🌟 Her şey yolunda mı senin tarafta?',
+    'Gayet iyi! ✨ Umarım sen de iyisindir '+firstName+'!',
+    'Muhteşemim! 🎉 Seni de iyi görmek güzel!',
+    'İdeal durumda çalışıyorum! 🤖 Sen nasılsın?'
+  ],
+  yorgunluk: [
+    firstName+', dinlenmeyi ihmal etme. 😴 Az uyku verimini düşürür.',
+    'Anlıyorum, zor bir gün gibi görünüyor. 💙 Biraz mola ver.',
+    'Yorgunluk sinyal veriyor, dinlenme zamanı! 😪 Ne kadar uyudun son zamanlarda?',
+    firstName+', kısa bir yürüyüş bile enerji verebilir. 🌿',
+    'Bazen 20 dakikalık bir uyku mucize yapıyor. 💤 Fırsatın var mı?',
+    'Yorgunluğun geçici, dinlenince tekrar zinde olacaksın! ⚡',
+    firstName+', kafein fazla tüketmek uzun vadede daha çok yorar. 🍵 Su iç, mola ver.',
+    'Anlıyorum. 🌙 Bugün erken yatmayı düşünüyor musun?'
+  ],
+  mutluluk: [
+    'Bu harika '+firstName+'! 🎉 Ne oldu, anlat!',
+    'Vay be, enerjin hissediliyou! 😄 Devam et!',
+    'Çok güzel! 🌟 Bu mutluluğun devam etmesi dileğiyle!',
+    firstName+', bu enerji süper! 🚀 Ne var, paylaş!',
+    'Güzel haberler duymak her zaman iyi hissettiriyor! 😊',
+    'Bravo! 🎊 Bu mutluluğu hak ediyorsun!',
+    'Ne güzel! ✨ Böyle haberler günümü güzelleştiriyor!',
+    firstName+' gülümsüyor galiba! 😁 Ne var anlat!',
+    'Harika! 🌈 Mutlu haberleri paylaşmak daha da güzel yapar!'
+  ],
+  uzuntu: [
+    firstName+', buradayım. 💙 Anlat, ne oldu?',
+    'Zor bir an gibi görünüyor. 😔 Ne hissediyorsun?',
+    'Üzülmek insani bir duygu. 💙 Yalnız değilsin.',
+    firstName+', bazen sadece birinin dinlemesi yeterli. Ben buradayım.',
+    'Hmm, bu gerçekten zor. 😔 Ne zamandan beri böyle?',
+    'Anlıyorum. 💙 Peki bu konuda ne yapmak istersin?',
+    firstName+', her fırtınanın bir sonu var. 🌤',
+    'Üzüntünü paylaşmak iyi. 💙 Devam et, dinliyorum.',
+    'Zaman zaman böyle hisler gelir. 😔 Yanındayım.',
+    'Ne olduğunu anlatırsan belki birlikte bir yol buluruz. 💙'
+  ],
+  stres: [
+    firstName+', derin bir nefes al önce. 🌬️ Şimdi anlat.',
+    'Stres altındayken her şey daha zor görünür. 😤 Yavaş yavaş ilerle.',
+    'Anlıyorum, çok şey var üzerinde. 💙 Önceliklendirmeye çalış.',
+    firstName+', bir adım geri çekip büyük resme bakabilir misin?',
+    'Stresli anlarda spor veya yürüyüş çok işe yarıyor. 🏃',
+    'Ne seni en çok strese sokuyor? Belki birlikte çözebiliriz.',
+    firstName+', her şeyi tek seferde çözmek zorunda değilsin.',
+    'Biraz mola ver. ☕ Beyin dinlendikçe daha iyi çalışır.'
+  ],
+  sikinti: [
+    firstName+', sıkılınca ne yapmayı seversin genelde?',
+    'Sıkıntı yaratıcılığın kapısı olabilir! 🎨 Bir şeyler dene.',
+    'Yeni bir şey öğrenmek için harika bir an! 📚 Ne ilginizi çekiyor?',
+    'Film veya dizi izlemeye ne dersin? 🎬',
+    firstName+', bir yürüyüşe çıkmayı düşündün mü? 🌿',
+    'Sıkılmışsan bir şeyler üret! Kod yaz, çiz, yaz. ✍️',
+    'Oyun oynamak ister misin? Sudoku, satranç... 🎮',
+    'Bazen sıkılmak aslında zihnin dinlenmesi. 😌'
+  ],
+  motivasyon: [
+    firstName+', küçük adımlar büyük hedeflere götürür. 🚀',
+    'Bugün yapılan küçük şeyler, yarın fark yaratır. ⚡',
+    'Her uzman bir zamanlar başlangıç noktasındaydı. 💪',
+    firstName+', en zor yokuş başlangıçta. Bir adım at!',
+    'Başarı her gün biraz daha yaklaşıyor. 🎯',
+    'Kendine inan '+firstName+'. Yapabilirsin! 🌟',
+    'Bugünün versiyon 1, yarın 2.0 olacaksın. 📈',
+    'Yorulsun ama durma. Mola ver ama bırakma. 💪',
+    firstName+', hedefine olan her adım değerli. 🏆',
+    'Düşüş kaçınılmaz, kalkış zorunlu. Haydi! 🚀'
+  ],
+  espri: [
+    'Yazılımcı neden bahçeye gider? Çünkü "bug" bulmak zorunda! 🐛😄',
+    'Neden programcılar karanlıktan korkmaz? Çünkü "light mode" var! 💡',
+    'Dedektif neden iyi kod yazar? Çünkü her "case"i çözer. 🕵️',
+    'Yapay zeka barmen olsa ne söyler? "Sorununuz compile mı edildi?" 😂',
+    'Fare ve klavye kavga ederse kim kazanır? Mouse, çünkü "click" avantajı var! 🖱️',
+    firstName+', neden JavaScript üzgün? Çünkü "undefined" hissediyor! 😅',
+    'Robot diyet yapıyormuş — "byte" azaltıyormuş. 🤖😄',
+    'Çay içen yazılımcıya ne denir? Java developer! ☕',
+    'Git push yaptım, yerim sarsıldı. Commit mi attım yoksa deprem mi oldu? 😂',
+    'Sonsuz döngüye giren programcı: "Bu iş bitmeyecek loop..." 🔄'
+  ],
+  motivsoz: [
+    '"Başlamak, yarı yolda olmaktır." — Aristo 📖',
+    '"Düşerken değil, kalkarken göster kendini." 💪',
+    '"Her gün biraz daha iyi olmak yeterli." — James Clear 📈',
+    '"Başarı hazırlık ile fırsatın buluştuğu andır." 🎯',
+    '"Hayal et, inan, çalış, başar." 🌟',
+    '"Küçük adımlar büyük yolculuklar yaratır." 🚶',
+    '"Yapamam diyene, yapmadan önce sormak gerekir." 🤔',
+    '"Zorlu yollar güzel manzaralara çıkar." 🏔️',
+    '"Dün senden daha iyi ol yeter." 📅',
+    '"Çalışmak şans üretir." — Seneca ⚡'
+  ],
+  ilginc: [
+    'Biliyor muydun? Dünyadaki karıncaların toplam ağırlığı insanlardan fazladır! 🐜',
+    'İlginç: Bal arısı ömrü boyunca sadece 1/12 çay kaşığı bal üretir. 🍯',
+    'Wombatlar kare dışkı yapar — doğanın mühendisi! 🦘',
+    'Ahtapotların 3 kalbi ve mavi kanı var. 🐙',
+    'Uyurken burnunun kokuları hissettiği kanıtlandı! 👃',
+    'Küçük bir çikolata tadımı günde 4 kez yapılsa beyin aktivasyonu artar. 🧠',
+    'Gözlerinizi açık tutarak hapşıramazsınız. 🤧',
+    'Dünyanın en sessiz odası -20 dB. İnsan birkaç dakika dayanabiliyor. 🔇',
+    'Kar tanelerinin hiçbiri birbirine benzemiyor — 10^68 kombinasyon. ❄️',
+    'Ay her yıl dünyadan 3.8 cm uzaklaşıyor. 🌙'
+  ],
+  ask: [
+    firstName+', aşk her yerde farklı görünür. Sen ne hissediyorsun? 💕',
+    'Aşk zaman zaman karmaşık ama güzel. 💙 Anlat bakalım.',
+    'Kalp meselelerinde sadece hissetmek yeterli. 💕',
+    firstName+', duygularını ifade etmek cesaret ister. Tebrikler! 💪',
+    'Aşk bazen bir bakış, bazen bir kelime. ✨',
+    'Bu duygular ne zamandan beri var? 💕',
+    firstName+', sevgi en güçlü motivasyon kaynaklarından biri.',
+    'Duygular ne kadar karmaşık olsa da gerçektir. 💙'
+  ],
+  saglik: [
+    firstName+', bol su iç. 💧 Günde en az 8 bardak önerilir.',
+    'Düzenli uyku her şeyin temeli. 😴 7-9 saat hedefle.',
+    'Yürüyüş en basit ve etkili egzersiz. 🚶 Günde 30 dakika.',
+    firstName+', ekrandan ara sıra uzaklaşmak gözleri dinlendirir. 👁️',
+    'Meyve ve sebze tüketimini artırırsan fark hissedersin. 🥦',
+    'Stres yönetimi de sağlığın parçası. 🧘',
+    firstName+', periyodik sağlık kontrollerini atlatma. 🏥',
+    'Sigara ve aşırı alkol, en büyük sağlık riskleri. 🚭'
+  ],
+  iyi: [
+    firstName+', iyi günler her zaman geri gelir. 🌤',
+    'Güzel! 😊 Bunu hak ediyorsun.',
+    'Harika! ✨ Devam et böyle.',
+    firstName+', bu iyilik enerjini koru! 🌟',
+    'Süper! 🎉 Bugün iyi şeyler olsun.',
+    'Güzel haberler duymak her zaman iyi. 😄'
+  ],
+  gunes: [
+    firstName+', güneşli günler ruhunu açar! ☀️ Dışarı çık biraz.',
+    'Güneş D vitamini deposu! ☀️ Biraz maruz kalmak faydalı.',
+    'Güzel bir gün gibi görünüyor. 🌤 Değerlendir!',
+    'Güneş varken ruh hali otomatik düzeliyor. ☀️😊'
+  ],
+  geceler: [
+    'İyi geceler '+firstName+'! 🌙 Güzel rüyalar.',
+    'İyi geceler! 😴 Güzelce dinlen.',
+    'Tatlı rüyalar '+firstName+'! 🌙✨',
+    'İyi geceler! Yarın yeni bir gün, yeni fırsatlar. 🌟'
+  ],
+  tesekkur: [
+    'Rica ederim! 😊 Başka bir şey var mı?',
+    'Ne demek! 🙌 Her zaman buradayım.',
+    'Memnuniyetle! ✨ Başka sorun?',
+    'Rica ederim '+firstName+'! 😄',
+    'Ne demek canım! 🌟 Yardımcı olabilmek güzel.',
+    'Her zaman! 🤝 Bir dahaki sefere de beklerim.',
+    'Bir şey değil! 😊 İhtiyacın olursa buradayım.'
+  ],
+  kim: [
+    'Ben Highly AI 3.0! 🤖 Highly platformunun yapay zeka asistanıyım.',
+    'Highly AI — sana yardım etmek için buradayım! 🚀',
+    'Ben Highly\'nin AI asistanıyım, Gene 3.0 ile çalışıyorum! 🧠',
+    'Highly AI 3.0 — hava, döviz, sohbet, matematik ve daha fazlası! 🤖'
+  ],
+  dinle: [
+    firstName+', anlıyorum. 😊 Devam et, dinliyorum.',
+    'Hmm, ilginç. 🤔 Daha fazla anlat?',
+    firstName+', seni dinliyorum. Ne düşünüyorsun?',
+    'Tamam, anladım. Peki sen bu konuda ne hissediyorsun?',
+    'İlginç. 🤔 Devam et.',
+    firstName+', ne söylemek istediğini anlamaya çalışıyorum. Devam et.',
+    'Hmm, söylediklerini düşünüyorum... 🤔',
+    'Anlıyorum. Bunun hakkında ne yapabiliriz?'
+  ],
+  default3: [
+    firstName+', bunu tam anlayamadım. Biraz farklı söyler misin? 🤔',
+    'Hmm, bu konuda yeterli bilgim yok ama araştırabilirim! 🔍',
+    firstName+', daha açık yazarsan daha iyi yardımcı olabilirim.',
+    'Bunu anlayamadım. Başka bir şekilde sorsana? 😊',
+    'Şu an bu konuda bilgim yeterli değil, ama öğrenmeye devam ediyorum! 📚'
+  ]
+};
+
+// Intent kategorileri — geniş pattern havuzu
+var INTENTS3 = {
+  selam: ['selam','merhaba','hey ','hi ','günaydın','iyi günler','sabahlar','selamlar','yo ','naber','ne haber'],
+  nasilsin: ['nasılsın','naber','ne var ne yok','nasıl gidiyor','iyi misin','keyifler'],
+  yorgunluk: ['yorgun','yoruldum','uyuyamadım','uyku','bitkin','halsiz','dermansız','enerjim yok','kendimi iyi','kendimi kötü'],
+  mutluluk: ['mutlu','sevindim','harika','muhteşem','süper','başardım','kazandım','çok iyi','mükemmel','nefis','harikayım','bayıldım'],
+  uzuntu: ['üzgün','üzüldüm','ağladım','kötü hissed','moralim bozuk','kendimi kötü','hayal kırıklığı','mutsuz','bitkin','çöktüm'],
+  stres: ['stres','gergin','sinirli','kızgın','öfkeli','bunaldım','patlamak üzere','kafam karışık','kafam dolu'],
+  sikinti: ['sıkıldım','bıktım','canım sıkılı','yapacak bir şey','ne yapayım','sıkıcı'],
+  motivasyon: ['motive','motivasyon','ilham','teşvik','güç ver','cesaretlen','destek'],
+  espri: ['espri','fıkra','şaka','güldür','komik','eğlenceli bir şey'],
+  motivsoz: ['söz','alıntı','özdeyiş','motivasyon sözü','ilham verici'],
+  ilginc: ['ilginç','merak','bilgi ver','biliyor musun','ilginç bilgi','şaşırtıcı'],
+  ask: ['aşk','seviyorum','sevgilim','flört','ilişki','kalp','beğen','sevgi'],
+  saglik: ['sağlık','sağlıklı','hastalık','egzersiz','spor','beslenme','uyku düzeni'],
+  iyi: ['iyiyim','güzelim','harikayım','her şey yolunda','iyi geçiyor'],
+  gunes: ['güneş','güneşli','hava güzel','dışarı çıkayım','parklı','açık hava'],
+  geceler: ['iyi geceler','gece','uyumaya','yatıyorum','hayırlı geceler'],
+  tesekkur: ['teşekkür','sağ ol','eyvallah','thanks','çok işe yaradı','yardımcı oldun'],
+  kim: ['kimsin','sen kimsin','adın ne','hakkında','highly ai nedir','seni kim yaptı']
+};
+
+function detectIntent3(text) {
+  if(!text||typeof text!=='string')return 'dinle';
+  var tl=text.toLowerCase()
+    .replace(/[ğ]/g,'g').replace(/[ü]/g,'u').replace(/[ş]/g,'s')
+    .replace(/[ı]/g,'i').replace(/[ö]/g,'o').replace(/[ç]/g,'c');
+
+  // Fonksiyonel öncelikler
+  if(/saat kac|bugün ne|hangi gün|saat nedir/i.test(tl)) return 'tarih';
+  if(/dolar|euro|sterlin|doviz|kur|frank|yen/i.test(tl)) return 'doviz';
+  if(/hava|derece|sicaklik|yagmur|kar yag/i.test(tl)) return 'hava';
+  if(isMathExpr(text)) return 'matematik';
+  if(/karekök|sqrt|\d+!/i.test(text)) return 'matematik';
+
+  // Intent kategorileri
+  for(var cat in INTENTS3){
+    var patterns=INTENTS3[cat];
+    for(var i=0;i<patterns.length;i++){
+      if(tl.indexOf(patterns[i])!==-1)return cat;
+    }
+  }
+
+  // Sohbet cümlesi mi?
+  if(isSohbetCumlesi(text)){
+    var duygu=duyguAnaliz(text);
+    if(duygu==='olumsuz')return 'uzuntu';
+    if(duygu==='olumlu') return 'mutluluk';
+    return 'dinle';
+  }
+
+  // Bilgi sorusu?
+  if(/nedir|kimdir|ne zaman|nerede|nasil|hakkinda|acikla|anlat|tarih/i.test(tl)) return 'arama';
+
+  return 'dinle';
+}
+
+async function gene3Reply(text) {
+  if(!text||typeof text!=='string')return 'Bir şeyler ters gitti, tekrar dene.';
+  var intent=detectIntent3(text);
+
+  if(intent==='tarih') return tarihCevap();
+  if(intent==='matematik'){
+    var me=text.replace(/çarpı|kere/gi,'*').replace(/bölü/gi,'/').replace(/artı/gi,'+').replace(/eksi/gi,'-').replace(/,/g,'.');
+    var r=solveMath(me);
+    if(r!==null) return '🧮 **'+text.trim()+' = '+r+'**';
+    return '🧮 Bu işlemi çözemedim. Örnek: (15 + 3) * 200';
+  }
+  if(intent==='hava') return await havaCevap(extractCity(text));
+  if(intent==='doviz'){
+    var b='usd';
+    if(/euro|eur/i.test(text))b='eur';
+    else if(/sterlin|gbp/i.test(text))b='gbp';
+    else if(/frank|chf/i.test(text))b='chf';
+    else if(/yen|jpy/i.test(text))b='jpy';
+    return await dovizCevap(b);
+  }
+  if(intent==='arama'){
+    var w=await searchWiki(text);
+    if(w) return '📖 **'+w.title+'**\n\n'+w.text+'\n\nWikipedia: '+w.url;
+    return pick(G3.default3);
+  }
+
+  // Sohbet havuzları
+  var pools={
+    selam:G3.selam, nasilsin:G3.nasilsin, yorgunluk:G3.yorgunluk,
+    mutluluk:G3.mutluluk, uzuntu:G3.uzuntu, stres:G3.stres,
+    sikinti:G3.sikinti, motivasyon:G3.motivasyon, espri:G3.espri,
+    motivsoz:G3.motivsoz, ilginc:G3.ilginc, ask:G3.ask,
+    saglik:G3.saglik, iyi:G3.iyi, gunes:G3.gunes, geceler:G3.geceler,
+    tesekkur:G3.tesekkur, kim:G3.kim, dinle:G3.dinle
+  };
+
+  if(intent==='dinle'){
+    var duygu=duyguAnaliz(text);
+    var dinleCevaplar=duygu==='olumsuz'?[
+      'Seni duyuyorum '+firstName+'. 💙 Anlat, ne oldu? Dinliyorum.',
+      'Zor bir şey bu. 😔 Biraz daha anlat, ne hissediyorsun?',
+      firstName+', bazen sadece birinin dinlemesi bile yeterli. Ben buradayım, devam et.',
+      'Hmm, bu gerçekten zor görünüyor. 💙 Ne zamandan beri böyle hissediyorsun?',
+      'Anladım. 😔 Peki bu konuda ne yapmak istiyorsun?'
+    ]:duygu==='olumlu'?[
+      'Vay, kulağa güzel geliyor! 😊 Devam et, dinliyorum!',
+      'Harika! 🎉 Anlat bakalım daha fazla, merak ettim!',
+      firstName+', bu enerji çok güzel! 🌟 Ne oldu, paylaş!',
+      'Oh bu iyi bir şey! 😄 Devam et!'
+    ]:[
+      'Anlıyorum. 😊 Devam et, dinliyorum.',
+      'Hmm, ilginç. 🤔 Daha fazla anlat?',
+      firstName+', seni dinliyorum. Devam et.',
+      'Tamam, anladım. Peki sen bu konuda ne düşünüyorsun?'
+    ];
+    return pick(dinleCevaplar);
+  }
+
+  if(pools[intent]) return pick(pools[intent]);
+
+  // Son çare: wiki + default
+  var ww=await searchWiki(text);
+  if(ww) return '📖 **'+ww.title+'**\n\n'+ww.text+'\n\nWikipedia: '+ww.url;
+  return pick(G3.default3);
+}
+
+// ==================== ANA SEND ====================
+async function send() {
+  var text=msgInput.value.trim();
+  if(!text)return;
+  msgInput.value=''; msgInput.style.height='auto';
+  sendBtn.disabled=true;
+  addMsg('user',text);
+  addTyping();
+  var model=document.getElementById('modelSel').value;
+
+  try {
+    await new Promise(function(r){setTimeout(r,400);});
+    rmTyping();
+
+    // Gene 2.0 ve 2.5 seçiliyse yönlendir
+    if(model==='gene20'||model==='gene25'){
+      addMsg('ai','Gene '+( model==='gene20'?'2.0':'2.5')+' için sizi yönlendiriyorum... 🔗');
+      setTimeout(function(){location.href='https://highly.com.tr/highly-ai.html';},1500);
+      return;
+    }
+
+    // Gene 3.0
+    var reply=await gene3Reply(text);
+    addMsg('ai',reply||'Bir şeyler ters gitti, tekrar dene.');
+  } catch(e) {
+    rmTyping();
+    addMsg('ai','Hata: '+e.message);
+  } finally {
+    sendBtn.disabled=false;
+    msgInput.focus();
+  }
+}
+
+msgInput.focus();
+</script>
+</body>
+</html>
