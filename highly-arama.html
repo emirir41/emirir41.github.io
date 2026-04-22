@@ -171,7 +171,7 @@ var av = document.getElementById('navAv');
 if (usr.avatarEmoji) { av.textContent = usr.avatarEmoji; av.style.background = 'transparent'; av.style.fontSize = '16px'; }
 else { av.textContent = (usr.name || '?')[0].toUpperCase(); if (usr.avatarBg) av.style.background = usr.avatarBg; }
 
-var WORKER = 'https://highly-ai-proxy.emrir41.workers.dev/search';
+var GCSE_CX = 'd31ebc2045edc439f';
 var activeType = 'search';
 
 document.querySelectorAll('.tab').forEach(function(t) {
@@ -198,67 +198,114 @@ function loading() {
     '<div class="dots"><span></span><span></span><span></span></div></div>';
 }
 
+// Google CSE'den sonuc cekme (callback API)
+function gcseSearch(q, start) {
+  start = start || 1;
+  return new Promise(function(resolve, reject) {
+    var cbName = '__gcse_cb_' + Date.now();
+    var timer = setTimeout(function() {
+      delete window[cbName];
+      reject(new Error('timeout'));
+    }, 10000);
+    window[cbName] = function(data) {
+      clearTimeout(timer);
+      delete window[cbName];
+      resolve(data);
+    };
+    var url = 'https://www.googleapis.com/customsearch/v1?cx=' + GCSE_CX +
+      '&q=' + encodeURIComponent(q) +
+      '&start=' + start +
+      '&num=10&hl=tr&gl=tr&callback=' + cbName;
+    var s = document.createElement('script');
+    s.src = url;
+    s.onerror = function() {
+      clearTimeout(timer);
+      delete window[cbName];
+      // API key gerekli, GCSE widget'a yonlendir
+      resolve({ _noApiKey: true });
+    };
+    document.head.appendChild(s);
+    setTimeout(function() { s.remove(); }, 12000);
+  });
+}
+
 async function run(q) {
   loading();
   document.getElementById('sBtn').disabled = true;
   try {
     if (activeType === 'search') {
-      // Snippet (hava/doviz) ve Google CSE sonuclarini paralel cek
+      // Snippet ve Google arama paralel calis
       var featured = null;
-      var gcseResultsPromise = fetchGCSE(q);
+      var gcsePromise = gcseSearch(q);
       try { featured = await getSnippet(q); } catch(e) {}
-      var gcseResults = await gcseResultsPromise;
-      renderWeb(gcseResults, featured);
-    } else {
-      var body = { q: q };
-      if (activeType === 'images') body.type = 'images';
-      if (activeType === 'news')   body.type = 'news';
-      var res  = await fetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      var data = await res.json();
-      if (activeType === 'news')   renderNews(data);
-      if (activeType === 'images') renderImgs(data);
+      var gcseData = await gcsePromise;
+      if (gcseData._noApiKey) {
+        // API key yok: Google CSE widget'i goster
+        renderGCSEWidget(q, featured);
+      } else {
+        renderWeb(gcseData, featured);
+      }
+    } else if (activeType === 'images') {
+      var gcseData = await gcseSearch(q + ' -site:adult.com', 1);
+      if (gcseData._noApiKey) {
+        renderGCSEWidget(q, null, 'images');
+      } else {
+        renderGCSEImages(gcseData);
+      }
+    } else if (activeType === 'news') {
+      renderGCSEWidget(q, null, 'news');
     }
   } catch(e) {
     document.getElementById('area').innerHTML =
-      '<div class="state"><span class="state-ico">&#10060;</span><div class="state-title">Baglanti hatasi</div></div>';
+      '<div class="state"><span class="state-ico">&#10060;</span><div class="state-title">Baglanti hatasi</div><div class="state-sub">' + (e.message||'') + '</div></div>';
   }
   document.getElementById('sBtn').disabled = false;
 }
 
-// Google CSE JSON API ile sonuc cekme
-var GCSE_CX = 'd31ebc2045edc439f';
-// Google CSE JSON API anahtari yoksa mevcut worker'a duselim
-// API anahtari varsa: var GCSE_API_KEY = 'YOUR_KEY';
-// Simdilik worker uzerinden Google sonuclari aliyoruz
-async function fetchGCSE(q) {
-  // Worker uzerinden Google-powered sonuclar al
-  try {
-    var res = await fetch(WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: q, engine: 'google' })
-    });
-    var data = await res.json();
-    return data;
-  } catch(e) {
-    return { organic: [], relatedSearches: [] };
+// API key yoksa Google CSE widget'i styled olarak goster
+function renderGCSEWidget(q, featured, type) {
+  var html = (featured || '');
+  html += '<div id="gcse-inline-wrap" style="margin-top:8px"></div>';
+  document.getElementById('area').innerHTML = html;
+  // Inline GCSE widget olustur
+  var wrap = document.getElementById('gcse-inline-wrap');
+  var typeAttr = type === 'images' ? 'gcse-searchresults-only' : (type === 'news' ? 'gcse-searchresults-only' : 'gcse-searchresults-only');
+  wrap.innerHTML = '<div class="gcse-searchresults-only" data-queryParameterName="q" data-defaultToImageSearch="' + (type==='images'?'true':'false') + '"></div>';
+  if (window.google && window.google.search && window.google.search.cse) {
+    window.google.search.cse.element.render({ div: wrap.firstChild, tag: 'searchresults-only', gname: 'inline_' + Date.now() });
+    setTimeout(function() {
+      if (window.google && window.google.search.cse.element.getElement) {
+        try {
+          var el = window.google.search.cse.element.getElement('inline_' + Date.now());
+          if (el) el.execute(q);
+        } catch(e2) {}
+      }
+    }, 300);
   }
+  // En guvenilir yol: GCSE'ye yonlendir
+  wrap.innerHTML = '<div style="padding:20px 0;text-align:center;color:var(--muted);font-size:13px">' +
+    'Google CSE API anahtari gerekli. ' +
+    '<a href="https://cse.google.com/cse?cx=' + GCSE_CX + '&q=' + encodeURIComponent(q) + '" target="_blank" style="color:var(--a2)">Google\'da ara &rarr;</a>' +
+    '</div>';
 }
 
-// Google CSE widget callback ile sonuc cekme (API key varsa kullan)
-function fetchGCSEViaWidget(q) {
-  return new Promise(function(resolve, reject) {
-    var timeout = setTimeout(function() { reject(new Error('GCSE timeout')); }, 8000);
-    function trySearch() {
-      if (window.google && window.google.search && window.google.search.cse && window.google.search.cse.element) {
-        clearTimeout(timeout);
-        reject(new Error('No API key'));
-      } else {
-        setTimeout(trySearch, 200);
-      }
-    }
-    trySearch();
+// Google CSE gorsel sonuclari
+function renderGCSEImages(data) {
+  var items = (data.items || []).filter(function(r) { return r.pagemap && r.pagemap.cse_image; });
+  if (!items.length) { empty(); return; }
+  var html = '<div class="results-meta">' + (data.searchInformation ? Number(data.searchInformation.totalResults).toLocaleString('tr-TR') + ' gorsel &middot; Google' : items.length + ' gorsel') + '</div><div class="img-grid">';
+  items.forEach(function(r) {
+    var src = (r.pagemap.cse_image[0] || {}).src || '';
+    var title = (r.title || '').replace(/"/g,'').replace(/'/g,'');
+    var link = r.link || src;
+    var domain = r.displayLink || '';
+    if (!src) return;
+    html += '<div class="img-item" onclick="openModal(' +
+      JSON.stringify(src) + ',' + JSON.stringify(title) + ',' + JSON.stringify(link) + ',' + JSON.stringify(domain) +
+      ')"><img src="' + src + '" alt="" loading="lazy" onerror="this.parentElement.style.display=\'none\'"/></div>';
   });
+  html += '</div>';
+  document.getElementById('area').innerHTML = html;
 }
 
 // Featured snippet
@@ -320,13 +367,10 @@ async function dovizSnippet(q) {
 }
 
 function renderWeb(data, featured) {
-  // Google CSE JSON API formati: data.items
-  // Worker formati: data.organic
-  var results = data.items || data.organic || [];
-  var related = data.relatedSearches || [];
+  var results = data.items || [];
+  var related = [];
   if (!results.length && !featured) { empty(); return; }
   var html = '';
-  // Once snippet (hava/doviz) goster
   if (featured) html += featured;
   html += '<div class="results-meta">';
   if (data.searchInformation && data.searchInformation.totalResults) {
@@ -336,65 +380,15 @@ function renderWeb(data, featured) {
   }
   html += '</div>';
   results.forEach(function(r) {
-    // CSE formati: r.link, r.title, r.snippet, r.displayLink
-    // Worker formati: r.link, r.title, r.snippet
     var domain = r.displayLink || '';
-    if (!domain) {
-      try { domain = new URL(r.link).hostname.replace('www.', ''); } catch(e) {}
-    }
+    if (!domain) { try { domain = new URL(r.link).hostname.replace('www.',''); } catch(e){} }
     var favicon = 'https://www.google.com/s2/favicons?sz=16&domain=' + domain;
     html += '<div class="web-result">' +
       '<div class="wr-src"><img src="' + favicon + '" width="14" height="14" style="border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'"/>' +
       '<span class="wr-domain">' + domain + '</span></div>' +
-      '<a href="' + r.link + '" target="_blank" class="wr-title">' + (r.title || '') + '</a>' +
-      '<div class="wr-snip">' + (r.snippet || '') + '</div></div>';
+      '<a href="' + r.link + '" target="_blank" class="wr-title">' + (r.title||'') + '</a>' +
+      '<div class="wr-snip">' + (r.snippet||'') + '</div></div>';
   });
-  if (related.length) {
-    html += '<div class="related"><div class="related-lbl">Ilgili aramalar</div><div class="related-chips">';
-    related.slice(0, 8).forEach(function(r) {
-      html += '<div class="rel-chip" onclick="qs(this.textContent)">' + r.query + '</div>';
-    });
-    html += '</div></div>';
-  }
-  document.getElementById('area').innerHTML = html;
-}
-
-function renderNews(data) {
-  var results = data.news || [];
-  if (!results.length) { empty(); return; }
-  var html = '<div class="results-meta">' + results.length + ' haber bulundu</div>';
-  results.forEach(function(r) {
-    html += '<div class="news-item">' +
-      '<div class="ni-img">' + (r.imageUrl ? '<img src="' + r.imageUrl + '" alt="" onerror="this.parentElement.textContent=\'&#128240;\'" />' : '&#128240;') + '</div>' +
-      '<div style="flex:1;min-width:0">' +
-      '<a href="' + r.link + '" target="_blank" class="ni-title">' + (r.title || '') + '</a>' +
-      '<div class="ni-meta">' + (r.source || '') + ' &middot; ' + (r.date || '') + '</div>' +
-      '<div class="ni-snip">' + (r.snippet || '') + '</div>' +
-      '</div></div>';
-  });
-  document.getElementById('area').innerHTML = html;
-}
-
-function renderImgs(data) {
-  var results = data.images || [];
-  if (!results.length) { empty(); return; }
-  var html = '<div class="results-meta">' + results.length + ' gorsel bulundu</div><div class="img-grid">';
-  results.forEach(function(r) {
-    var src    = r.imageUrl || r.thumbnailUrl || '';
-    var title  = (r.title || '').replace(/"/g, '').replace(/'/g, '');
-    var link   = r.link || src;
-    var domain = '';
-    try { domain = new URL(link).hostname.replace('www.', ''); } catch(e) {}
-    html += '<div class="img-item" onclick="openModal(' +
-      JSON.stringify(src) + ',' +
-      JSON.stringify(title) + ',' +
-      JSON.stringify(link) + ',' +
-      JSON.stringify(domain) +
-      ')">' +
-      '<img src="' + src + '" alt="" loading="lazy" onerror="this.parentElement.style.display=\'none\'"/>' +
-      '</div>';
-  });
-  html += '</div>';
   document.getElementById('area').innerHTML = html;
 }
 
